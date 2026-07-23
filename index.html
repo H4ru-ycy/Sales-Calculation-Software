@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>売上計算ソフト</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1>売上計算ソフト</h1>
+      <p class="subtitle">＋／－ボタンで暫定金額をリアルタイム計算</p>
+    </header>
+
+    <main class="main">
+      <section class="card">
+        <h2>保存先の設定</h2>
+        <div class="form-grid">
+          <div class="field">
+            <label for="folderName">フォルダ名</label>
+            <input type="text" id="folderName" list="folderList" placeholder="例：店舗A、イベント売上">
+            <datalist id="folderList"></datalist>
+          </div>
+          <div class="field">
+            <label for="recordDate">日付</label>
+            <input type="date" id="recordDate">
+          </div>
+        </div>
+      </section>
+
+      <section class="card calculator">
+        <h2>商品入力</h2>
+        <div class="form-grid">
+          <div class="field">
+            <label for="productName">商品名 <span class="optional">（任意）</span></label>
+            <input type="text" id="productName" placeholder="例：コーヒー">
+          </div>
+          <div class="field">
+            <label for="productPrice">商品価格 <span class="optional">（任意・円）</span></label>
+            <div class="price-input-wrap">
+              <span class="currency">¥</span>
+              <input type="number" id="productPrice" min="0" step="1" placeholder="500">
+            </div>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button type="button" id="btnMinus" class="btn btn-minus" aria-label="減算">−</button>
+          <button type="button" id="btnPlus" class="btn btn-plus" aria-label="加算">＋</button>
+        </div>
+
+        <div class="total-display">
+          <span class="total-label">暫定金額</span>
+          <span class="total-amount" id="runningTotal">¥0</span>
+        </div>
+
+        <div class="operation-log">
+          <h3>操作履歴</h3>
+          <ul id="operationList" class="operation-list">
+            <li class="empty-msg">＋または−ボタンを押すとここに表示されます</li>
+          </ul>
+        </div>
+
+        <div class="finish-row">
+          <button type="button" id="btnReset" class="btn btn-secondary">リセット</button>
+          <button type="button" id="btnFinish" class="btn btn-finish">終了（保存）</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-header">
+          <h2>保存済みデータ</h2>
+          <button type="button" id="btnRefresh" class="btn btn-text">更新</button>
+        </div>
+        <div id="savedRecords" class="saved-records">
+          <p class="empty-msg">保存されたデータはありません</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

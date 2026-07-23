@@ -1,0 +1,399 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #f0f4f8;
+  --surface: #ffffff;
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --plus: #059669;
+  --plus-dark: #047857;
+  --minus: #dc2626;
+  --minus-dark: #b91c1c;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  --shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+  --radius: 12px;
+}
+
+body {
+  font-family: "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", Meiryo, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-top: 6px;
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.card h2 {
+  font-size: 1.1rem;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border);
+}
+
+.form-grid {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 520px) {
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.field label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.optional {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.field input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.field input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.price-input-wrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.price-input-wrap:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.currency {
+  padding: 10px 12px;
+  background: #f8fafc;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.price-input-wrap input {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.price-input-wrap input:focus {
+  box-shadow: none;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin: 28px 0;
+}
+
+.btn {
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 2rem;
+  font-weight: 700;
+  width: 88px;
+  height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s, background 0.15s, box-shadow 0.15s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.btn:active {
+  transform: scale(0.95);
+}
+
+.btn-plus {
+  background: var(--plus);
+  color: white;
+}
+
+.btn-plus:hover {
+  background: var(--plus-dark);
+}
+
+.btn-minus {
+  background: var(--minus);
+  color: white;
+}
+
+.btn-minus:hover {
+  background: var(--minus-dark);
+}
+
+.total-display {
+  text-align: center;
+  padding: 24px;
+  background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+}
+
+.total-label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.total-amount {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.operation-log h3 {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.operation-list {
+  list-style: none;
+  max-height: 160px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.operation-list li {
+  padding: 6px 10px;
+  font-size: 0.875rem;
+  border-bottom: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+}
+
+.operation-list li:last-child {
+  border-bottom: none;
+}
+
+.operation-list .op-plus {
+  color: var(--plus);
+}
+
+.operation-list .op-minus {
+  color: var(--minus);
+}
+
+.finish-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.btn-secondary,
+.btn-finish {
+  border-radius: 8px;
+  width: auto;
+  height: auto;
+  font-size: 1rem;
+  padding: 12px 24px;
+  flex: 1;
+}
+
+.btn-secondary {
+  background: #f1f5f9;
+  color: var(--text);
+  box-shadow: none;
+}
+
+.btn-secondary:hover {
+  background: #e2e8f0;
+}
+
+.btn-finish {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-finish:hover {
+  background: var(--primary-dark);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.section-header h2 {
+  margin-bottom: 0;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.btn-text {
+  border-radius: 6px;
+  width: auto;
+  height: auto;
+  font-size: 0.875rem;
+  padding: 6px 12px;
+  background: transparent;
+  color: var(--primary);
+  box-shadow: none;
+}
+
+.btn-text:hover {
+  background: #eff6ff;
+}
+
+.saved-records {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.folder-group {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.folder-title {
+  background: #f8fafc;
+  padding: 10px 14px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.date-group {
+  padding: 0 14px 10px;
+}
+
+.date-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 10px 0 6px;
+}
+
+.record-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background: #fafafa;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 0.875rem;
+}
+
+.record-item:last-child {
+  margin-bottom: 0;
+}
+
+.record-info {
+  flex: 1;
+}
+
+.record-amount {
+  font-weight: 700;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.btn-delete {
+  border: none;
+  background: transparent;
+  color: var(--minus);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  width: auto;
+  height: auto;
+  box-shadow: none;
+}
+
+.btn-delete:hover {
+  background: #fef2f2;
+}
+
+.empty-msg {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  text-align: center;
+  padding: 12px;
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #1e293b;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  opacity: 0;
+  transition: transform 0.3s, opacity 0.3s;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
