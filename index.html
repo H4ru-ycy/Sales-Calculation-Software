@@ -1,87 +1,1731 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>売上計算ソフト</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="売上計算">
+<meta name="theme-color" content="#12211E">
+<title>売上計算</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#12211E;
+  --paper:#EEF1F0;
+  --card:#FFFFFF;
+  --line:#D6DCDA;
+  --muted:#6E7C78;
+  --field:#FAFBFB;
+  --strong-bg:#12211E;
+  --strong-fg:#FFFFFF;
+  --bar-bg:#12211E;
+  --bar-fg:#FFFFFF;
+  --bar-sub:#93A5A0;
+  --banner-bg:#E3EDEB;
+  --amber:#E8A81E;
+  --amber-soft:#FDF3DA;
+  --amber-ink:#8A6407;
+  --clay-soft:#F7E4E2;
+  --faint:#A9B4B1;
+  --teal:#0F6D63;
+  --clay:#A8433A;
+  --shadow:0 1px 0 rgba(18,33,30,.06), 0 6px 18px rgba(18,33,30,.07);
+  --pad:16px;
+  --footer-h:104px;
+}
+html[data-theme="dark"]{
+  --ink:#ECF1EF; --paper:#0F1412; --card:#18211E; --line:#2C3835; --muted:#93A19D;
+  --field:#121A18; --strong-bg:#E9EFED; --strong-fg:#101614;
+  --bar-bg:#1E2A26; --bar-fg:#ECF1EF; --bar-sub:#8FA29D; --banner-bg:#15302B;
+  --amber:#F0B429; --amber-soft:#2F2712; --amber-ink:#F0C462; --teal:#4FBFA8; --clay:#E58279; --clay-soft:#33201E; --faint:#5F6D69;
+  --shadow:0 1px 0 rgba(0,0,0,.3), 0 6px 18px rgba(0,0,0,.35);
+}
+html[data-theme="navy"]{
+  --ink:#E8EEF7; --paper:#0C1730; --card:#152742; --line:#263C5E; --muted:#93A6C4;
+  --field:#101E38; --strong-bg:#E8EEF7; --strong-fg:#0C1730;
+  --bar-bg:#1B3358; --bar-fg:#E8EEF7; --bar-sub:#8AA0C2; --banner-bg:#123050;
+  --amber:#F3C044; --amber-soft:#243b5e; --amber-ink:#F3C044; --teal:#54C7DA; --clay:#F08A8A; --clay-soft:#3A1E24; --faint:#5E7093;
+  --shadow:0 1px 0 rgba(0,0,0,.3), 0 8px 20px rgba(0,0,0,.4);
+}
+html[data-theme="mocha"]{
+  --ink:#F1E8DE; --paper:#1A130E; --card:#261C14; --line:#3E3125; --muted:#B7A390;
+  --field:#20160F; --strong-bg:#F1E8DE; --strong-fg:#1A130E;
+  --bar-bg:#2C2016; --bar-fg:#F1E8DE; --bar-sub:#B09A85; --banner-bg:#2C2417;
+  --amber:#E9A93A; --amber-soft:#332615; --amber-ink:#E9B860; --teal:#57B79E; --clay:#E38A78; --clay-soft:#3A211A; --faint:#8A7663;
+  --shadow:0 1px 0 rgba(0,0,0,.3), 0 6px 18px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"Zen Kaku Gothic New",-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+  font-size:16px;line-height:1.5;
+  -webkit-text-size-adjust:100%;
+  overscroll-behavior-y:contain;
+}
+.num{font-family:"Roboto Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input{font-family:inherit;font-size:16px}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+
+/* ---------- shell ---------- */
+.app{max-width:720px;margin:0 auto;padding:0 var(--pad);padding-bottom:calc(var(--footer-h) + env(safe-area-inset-bottom,0px) + 24px)}
+.topbar{
+  position:sticky;top:0;z-index:30;background:var(--paper);
+  padding:14px 0 10px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:12px;
+}
+.topbar h1{margin:0;font-size:17px;font-weight:900;letter-spacing:.02em;flex:1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .date{font-size:12px;color:var(--muted);font-weight:500}
+.back{font-size:14px;font-weight:700;color:var(--teal);padding:6px 2px}
+
+/* ---------- home ---------- */
+.hero{padding:28px 0 20px}
+.eyebrow{font-size:11px;letter-spacing:.28em;color:var(--muted);font-weight:700;margin-bottom:10px}
+.hero h2{margin:0;font-size:32px;line-height:1.2;font-weight:900;letter-spacing:-.01em}
+.hero p{margin:10px 0 0;color:var(--muted);font-size:14px}
+
+.panel{background:var(--card);border-radius:14px;padding:18px;box-shadow:var(--shadow);margin-bottom:22px}
+.panel h3{margin:0 0 14px;font-size:14px;font-weight:900;letter-spacing:.04em}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.field input{
+  width:100%;padding:13px 12px;border:1.5px solid var(--line);border-radius:10px;
+  background:var(--field);color:var(--ink);font-weight:500;
+}
+.field input:focus{border-color:var(--ink);background:var(--card);outline:none}
+.row2{display:flex;gap:10px}
+.row2 .field{flex:1;margin-bottom:12px}
+
+.btn{
+  display:block;width:100%;padding:15px;border-radius:11px;
+  font-size:15px;font-weight:900;letter-spacing:.03em;text-align:center;
+}
+.btn-primary{background:var(--strong-bg);color:var(--strong-fg)}
+.btn-primary:active{transform:translateY(1px)}
+.btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--line)}
+.btn-danger{background:var(--clay);color:#fff}
+.btn:disabled{opacity:.35;pointer-events:none}
+
+.filelist{list-style:none;margin:0;padding:0}
+.filecard{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  background:var(--card);border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow);
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
+  transition:transform .12s, background .12s;
+}
+.filecard.pressing{transform:scale(.97);background:var(--amber-soft)}
+.filecard.press{transform:scale(.97)}
+.stock{
+  display:inline-block;font-size:11px;font-weight:900;letter-spacing:.04em;
+  padding:2px 7px;border-radius:5px;background:var(--banner-bg);color:var(--teal);margin-left:6px;
+}
+.stock.low{background:var(--amber-soft);color:var(--amber-ink)}
+.stock.zero{background:var(--clay-soft);color:var(--clay)}
+.padstock{font-size:12px;font-weight:700;color:var(--amber-ink);padding-top:10px;text-align:center}
+.filecard .fmeta{flex:1;min-width:0}
+.filecard .fname{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.filecard .fsub{font-size:12px;color:var(--muted);margin-top:2px}
+.filecard .ftotal{font-size:17px;font-weight:700}
+.badge{display:inline-block;font-size:10px;font-weight:900;letter-spacing:.08em;
+  padding:3px 7px;border-radius:5px;vertical-align:1px;margin-right:6px}
+.badge.open{background:var(--amber-soft);color:var(--amber-ink)}
+.badge.done{background:var(--banner-bg);color:var(--teal)}
+.empty{text-align:center;color:var(--muted);font-size:13px;padding:26px 10px;
+  border:1.5px dashed var(--line);border-radius:12px}
+
+/* ---------- items ---------- */
+.sectionhead{display:flex;align-items:baseline;gap:8px;margin:22px 2px 10px}
+.home-note{margin:-8px 2px 4px;font-size:12.5px;font-weight:700;line-height:1.6;color:var(--clay)}
+.sectionhead h3{margin:0;font-size:13px;font-weight:900;letter-spacing:.06em}
+.sectionhead span{font-size:11px;color:var(--muted);font-weight:500}
+
+.item{
+  background:var(--card);border-radius:14px;margin-bottom:10px;
+  box-shadow:var(--shadow);overflow:hidden;position:relative;
+  border-left:5px solid transparent;transition:border-color .18s, box-shadow .18s;
+}
+.item.sel{border-left-color:var(--amber);box-shadow:0 0 0 2px var(--amber), var(--shadow)}
+.item-head{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 14px}
+.item-name{flex:1;min-width:0}
+.item-name .n{font-weight:700;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-name .p{font-size:12px;color:var(--muted);margin-top:1px}
+.stock{font-weight:700}
+.stock.low{color:var(--amber-ink)}
+.stock.out{color:var(--clay)}
+.stock.none{color:var(--faint);font-weight:500}
+.soldout{margin-top:10px;background:var(--clay-soft);color:var(--clay);border-radius:9px;
+  padding:9px 12px;font-size:12px;font-weight:700;text-align:center}
+.item-qty{font-size:13px;color:var(--muted);font-weight:700;white-space:nowrap}
+.item-qty b{font-size:19px;color:var(--ink)}
+.item-sub{font-size:16px;font-weight:700;min-width:78px;text-align:right;white-space:nowrap}
+.item.sel .item-sub{color:var(--teal)}
+
+.pad{display:none;padding:0 14px 16px;background:linear-gradient(180deg,var(--amber-soft),var(--card))}
+.item.sel .pad{display:block}
+.padtag{font-size:10px;font-weight:900;letter-spacing:.18em;color:var(--amber-ink);padding:2px 0 10px}
+.padrow{display:flex;align-items:center;gap:12px}
+.step{
+  flex:1;height:66px;border-radius:12px;font-size:30px;font-weight:900;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid transparent;
+}
+.step.minus{background:var(--card);color:var(--clay);border-color:var(--clay)}
+.step.plus{background:var(--strong-bg);color:var(--strong-fg);flex:1.6}
+.step:active{transform:scale(.97)}
+.step:disabled{opacity:.3}
+.padcount{min-width:64px;text-align:center;font-size:28px;font-weight:700}
+.itemtools{display:flex;justify-content:flex-end;padding-top:10px}
+.itemtools button{font-size:12px;font-weight:700;color:var(--clay);padding:8px 4px}
+
+/* ---------- footer ---------- */
+.footer{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;
+  background:var(--bar-bg);color:var(--bar-fg);
+  padding:12px var(--pad) calc(12px + env(safe-area-inset-bottom,0px));
+  box-shadow:0 -8px 24px rgba(18,33,30,.18);
+}
+.footer-in{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:14px}
+.tot{flex:1;min-width:0}
+.tot .lbl{font-size:10px;letter-spacing:.22em;font-weight:700;color:var(--bar-sub)}
+.tot .val{font-size:34px;font-weight:700;line-height:1.1;white-space:nowrap}
+.tot .val small{font-size:15px;font-weight:500;margin-right:2px;color:var(--bar-sub)}
+.tot .val.bump{animation:bump .22s ease-out}
+@keyframes bump{0%{transform:translateY(-4px);opacity:.55}100%{transform:none;opacity:1}}
+.tot .sub{font-size:11px;color:var(--bar-sub);margin-top:2px}
+.finish{background:var(--amber);color:#2A1F00;padding:14px 18px;border-radius:11px;
+  font-size:14px;font-weight:900;letter-spacing:.04em;white-space:nowrap}
+.finish:active{transform:translateY(1px)}
+.finish:disabled{opacity:.4}
+.footer-btns{display:flex;flex-direction:column;gap:8px;flex:none}
+.checkout{background:var(--teal);color:#fff;padding:13px 18px;border-radius:11px;
+  font-size:14px;font-weight:900;letter-spacing:.04em;white-space:nowrap}
+.checkout:active{transform:translateY(1px)}
+.footer.locked{background:var(--teal)}
+.footer.locked .finish{background:rgba(255,255,255,.16);color:var(--bar-fg)}
+
+/* ---------- dialog ---------- */
+.scrim{position:fixed;inset:0;background:rgba(18,33,30,.55);z-index:60;
+  display:flex;align-items:center;justify-content:center;padding:20px}
+.dialog{background:var(--card);border-radius:16px;padding:22px;max-width:400px;width:100%}
+.dialog h4{margin:0 0 10px;font-size:19px;font-weight:900}
+.dialog p{margin:0 0 8px;font-size:14px;color:var(--muted);line-height:1.7}
+.dialog .recap{background:var(--paper);border-radius:10px;padding:12px;margin:14px 0}
+.dialog .recap div{display:flex;justify-content:space-between;font-size:13px;padding:3px 0}
+.dialog .recap .big{font-size:19px;font-weight:700;border-top:1px solid var(--line);margin-top:6px;padding-top:8px}
+.dialog .acts{display:flex;flex-direction:column;gap:9px;margin-top:6px}
+
+.banner{background:var(--banner-bg);color:var(--teal);border-radius:10px;padding:12px 14px;
+  font-size:13px;font-weight:700;margin:14px 0 4px;display:flex;gap:8px;align-items:center}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--footer-h) + 20px);
+  background:var(--strong-bg);color:var(--strong-fg);padding:11px 18px;border-radius:22px;font-size:13px;font-weight:700;
+  z-index:50;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+.hidden{display:none !important}
+
+/* ---------- tab bar ---------- */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:45;display:flex;
+  background:var(--card);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -4px 16px rgba(0,0,0,.06)}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 4px 8px;
+  color:var(--muted);font-weight:700}
+.tab .ti{font-size:19px;line-height:1}
+.tab .tl{font-size:10px;letter-spacing:.02em}
+.tab.on{color:var(--teal)}
+.tab.on .tl{font-weight:900}
+body.has-tabbar .app{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px) + 20px)}
+
+/* ---------- segmented ---------- */
+.segbtns{display:flex;gap:6px;flex-wrap:wrap}
+.seg{padding:9px 14px;border-radius:9px;border:1.5px solid var(--line);background:var(--field);
+  color:var(--muted);font-size:13px;font-weight:700}
+.seg.on{background:var(--strong-bg);color:var(--strong-fg);border-color:transparent}
+.seg:active{transform:translateY(1px)}
+
+/* ---------- inventory ---------- */
+.invtools{margin-bottom:14px}
+.invtools input{width:100%;padding:12px;border:1.5px solid var(--line);border-radius:10px;
+  background:var(--field);color:var(--ink);font-weight:500;margin-bottom:10px}
+.invtools input:focus{border-color:var(--ink);background:var(--card);outline:none}
+.invrow{background:var(--card);border-radius:12px;padding:13px 14px;margin-bottom:9px;box-shadow:var(--shadow)}
+.invrow .ir-top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.invrow .ir-title{font-weight:700;font-size:15px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.invrow .ir-kind{flex:none;font-size:10px;font-weight:900;padding:2px 7px;border-radius:5px}
+.ir-kind.k1{background:var(--amber-soft);color:var(--amber-ink)}
+.ir-kind.k2{background:var(--banner-bg);color:var(--teal)}
+.ir-kind.k3{background:var(--clay-soft);color:var(--clay)}
+.invrow{cursor:pointer}
+.inv-edit{padding:2px}
+.invrow .ir-sub{font-size:12px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
+.invrow .ir-price{font-weight:700;color:var(--ink)}
+
+/* ---------- utility ---------- */
+.u-desc{font-size:13px;color:var(--muted);line-height:1.7;margin:0 0 14px}
+.bk-ta{width:100%;min-height:80px;padding:12px;border:1.5px solid var(--line);border-radius:10px;
+  background:var(--field);color:var(--ink);font-size:13px;line-height:1.5;resize:vertical;
+  font-family:"Roboto Mono",ui-monospace,monospace;margin:8px 0;-webkit-user-select:text;user-select:text}
+.bk-ta:focus{border-color:var(--ink);background:var(--card);outline:none}
+
+/* ---------- toggle ---------- */
+.toggle-row{display:flex;align-items:center;gap:12px}
+.toggle-row>div:first-child{flex:1}
+.toggle-title{font-size:15px;font-weight:700}
+.toggle-sub{font-size:12px;color:var(--muted);margin-top:1px}
+.toggle{width:52px;height:31px;border-radius:16px;background:var(--line);position:relative;flex:none;transition:background .18s}
+.toggle .knob{position:absolute;top:3px;left:3px;width:25px;height:25px;border-radius:50%;background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .18s}
+.toggle.on{background:var(--teal)}
+.toggle.on .knob{left:24px}
+.ext-panel{margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+.ext-status{font-size:13px;font-weight:700;padding:10px 12px;border-radius:9px;
+  background:var(--field);color:var(--muted);margin-bottom:12px;text-align:center}
+.ext-status.on{background:var(--banner-bg);color:var(--teal)}
+.ext-status.err{background:var(--clay-soft);color:var(--clay)}
+
+/* ---------- QR overlay ---------- */
+.qr-wrap{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.9);display:flex;flex-direction:column}
+.qr-head{display:flex;align-items:center;gap:10px;padding:14px 16px;color:#fff}
+.qr-head h3{margin:0;flex:1;font-size:16px;font-weight:900}
+.qr-close{width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,.15);color:#fff;font-size:18px}
+.qr-video-wrap{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.qr-video-wrap video{width:100%;height:100%;object-fit:cover}
+.qr-frame{position:absolute;width:64vw;max-width:280px;aspect-ratio:1;border:3px solid #fff;border-radius:18px;box-shadow:0 0 0 100vmax rgba(0,0,0,.45)}
+.qr-hint{color:#fff;text-align:center;padding:16px;font-size:13px;opacity:.85}
+
+/* ---------- menu ---------- */
+.homebar{
+  position:sticky;top:0;z-index:30;background:var(--paper);
+  display:flex;justify-content:flex-end;align-items:center;
+  padding:8px 0 4px;
+}
+.hamb{
+  width:44px;height:44px;border-radius:11px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  background:var(--card);box-shadow:var(--shadow);flex:none;
+}
+.hamb span{display:block;width:18px;height:2px;background:var(--ink);border-radius:2px}
+.hamb:active{transform:scale(.95)}
+
+.sheetwrap{position:fixed;inset:0;z-index:70;display:flex;justify-content:flex-end}
+.sheetwrap .bg{position:absolute;inset:0;background:rgba(18,33,30,.5)}
+.sheet{
+  position:relative;background:var(--paper);width:min(420px,88%);height:100%;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:18px 18px calc(28px + env(safe-area-inset-bottom,0px));
+  box-shadow:-10px 0 30px rgba(18,33,30,.2);
+  animation:slidein .22s ease-out;
+}
+@keyframes slidein{from{transform:translateX(24px);opacity:.4}to{transform:none;opacity:1}}
+.sheet-top{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.sheet-top h3{margin:0;flex:1;font-size:16px;font-weight:900}
+.sheet-close{width:36px;height:36px;border-radius:9px;background:var(--card);
+  box-shadow:var(--shadow);font-size:18px;font-weight:700;line-height:1}
+.menu-item{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  background:var(--card);border-radius:12px;padding:16px 14px;margin-bottom:10px;
+  box-shadow:var(--shadow);font-size:15px;font-weight:700;
+}
+.menu-item .chev{margin-left:auto;color:var(--muted);font-weight:400}
+.menu-item .ic{width:30px;height:30px;border-radius:8px;background:var(--amber-soft);
+  display:flex;align-items:center;justify-content:center;font-size:15px;flex:none}
+.sheet-ver{text-align:center;color:var(--muted);font-size:11px;letter-spacing:.14em;margin-top:22px}
+
+.howto{counter-reset:s;list-style:none;margin:0;padding:0}
+.howto li{background:var(--card);border-radius:12px;padding:14px 14px 14px 48px;
+  margin-bottom:10px;box-shadow:var(--shadow);position:relative;font-size:14px;line-height:1.7}
+.howto li::before{counter-increment:s;content:counter(s);
+  position:absolute;left:14px;top:14px;width:22px;height:22px;border-radius:6px;
+  background:var(--strong-bg);color:var(--strong-fg);font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center}
+.howto li b{display:block;font-size:15px;margin-bottom:2px}
+.note{background:var(--amber-soft);border-radius:12px;padding:14px;font-size:13px;
+  line-height:1.8;color:var(--amber-ink);margin-top:4px}
+.note b{display:block;margin-bottom:4px;font-size:13px}
+
+.contact-lead{font-size:13px;color:var(--muted);line-height:1.8;margin:0 0 14px}
+.link-card{
+  display:flex;align-items:center;gap:12px;background:var(--card);border-radius:12px;
+  padding:15px 14px;margin-bottom:10px;box-shadow:var(--shadow);
+  text-decoration:none;color:var(--ink);
+}
+.link-card .ic{width:36px;height:36px;border-radius:9px;background:var(--strong-bg);color:var(--strong-fg);
+  display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex:none}
+.link-card .lc-t{display:block;font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.06em}.link-card .lc-v{display:block;font-size:14px;font-weight:700;word-break:break-all}
+.themeopt{display:flex;align-items:center;gap:12px;width:100%;background:var(--card);border-radius:12px;
+  padding:14px;margin-bottom:10px;box-shadow:var(--shadow);font-size:15px;font-weight:700;
+  border:2px solid transparent;text-align:left}
+.themeopt.on{border-color:var(--amber)}
+.themeopt .sw{width:34px;height:34px;border-radius:9px;border:1.5px solid var(--line);flex:none}
+.themeopt .themedesc{display:block;font-size:11px;font-weight:500;color:var(--muted)}
+.themeopt .mark{margin-left:auto;color:var(--amber);font-weight:900}
+.sw-light{background:#EEF1F0}
+.sw-dark{background:#151D1A}
+.sw-navy{background:#0C1730}
+.sw-mocha{background:#1A130E}
+.sw-auto{background:linear-gradient(135deg,#EEF1F0 50%,#151D1A 50%)}
+.menu-foot{display:flex;justify-content:flex-end;margin-top:2px}
+.verhist-btn{font-size:12px;font-weight:700;color:var(--muted);padding:8px 6px;
+  border-radius:8px;letter-spacing:.02em}
+.verhist-btn:active{background:var(--amber-soft)}
+.changelog{margin:2px 0 4px}
+.cl-item{background:var(--card);border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+.cl-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.cl-ver{font-size:16px;font-weight:900;letter-spacing:.02em}
+.cl-tag{font-size:10px;font-weight:900;letter-spacing:.06em;padding:3px 7px;border-radius:5px;
+  background:var(--banner-bg);color:var(--teal)}
+.cl-tag.now{background:var(--amber-soft);color:var(--amber-ink)}
+.cl-list{margin:0;padding-left:18px}
+.cl-list li{font-size:13px;line-height:1.7;color:var(--ink);margin-bottom:3px}
+
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+</style>
 </head>
 <body>
-  <div class="app">
-    <header class="header">
-      <h1>売上計算ソフト</h1>
-      <p class="subtitle">＋／－ボタンで暫定金額をリアルタイム計算</p>
-    </header>
 
-    <main class="main">
-      <section class="card">
-        <h2>保存先の設定</h2>
-        <div class="form-grid">
-          <div class="field">
-            <label for="folderName">フォルダ名</label>
-            <input type="text" id="folderName" list="folderList" placeholder="例：店舗A、イベント売上">
-            <datalist id="folderList"></datalist>
-          </div>
-          <div class="field">
-            <label for="recordDate">日付</label>
-            <input type="date" id="recordDate">
-          </div>
-        </div>
-      </section>
-
-      <section class="card calculator">
-        <h2>商品入力</h2>
-        <div class="form-grid">
-          <div class="field">
-            <label for="productName">商品名 <span class="optional">（任意）</span></label>
-            <input type="text" id="productName" placeholder="例：コーヒー">
-          </div>
-          <div class="field">
-            <label for="productPrice">商品価格 <span class="optional">（任意・円）</span></label>
-            <div class="price-input-wrap">
-              <span class="currency">¥</span>
-              <input type="number" id="productPrice" min="0" step="1" placeholder="500">
-            </div>
-          </div>
-        </div>
-
-        <div class="action-buttons">
-          <button type="button" id="btnMinus" class="btn btn-minus" aria-label="減算">−</button>
-          <button type="button" id="btnPlus" class="btn btn-plus" aria-label="加算">＋</button>
-        </div>
-
-        <div class="total-display">
-          <span class="total-label">暫定金額</span>
-          <span class="total-amount" id="runningTotal">¥0</span>
-        </div>
-
-        <div class="operation-log">
-          <h3>操作履歴</h3>
-          <ul id="operationList" class="operation-list">
-            <li class="empty-msg">＋または−ボタンを押すとここに表示されます</li>
-          </ul>
-        </div>
-
-        <div class="finish-row">
-          <button type="button" id="btnReset" class="btn btn-secondary">リセット</button>
-          <button type="button" id="btnFinish" class="btn btn-finish">終了（保存）</button>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="section-header">
-          <h2>保存済みデータ</h2>
-          <button type="button" id="btnRefresh" class="btn btn-text">更新</button>
-        </div>
-        <div id="savedRecords" class="saved-records">
-          <p class="empty-msg">保存されたデータはありません</p>
-        </div>
-      </section>
-    </main>
+<!-- ===== HOME ===== -->
+<section id="home" class="app">
+  <div class="homebar">
+    <button class="hamb" data-menu aria-label="メニューを開く"><span></span><span></span><span></span></button>
+  </div>
+  <div class="hero">
+    <div class="eyebrow">Ver.1.8</div>
+    <h2>売上計算ツール</h2>
+    <p>ファイルを作って商品を登録。＋と－で数えるだけ。</p>
   </div>
 
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div class="panel">
+    <h3>新しいファイルを作る</h3>
+    <div class="field">
+      <label for="newName">ファイル名</label>
+      <input id="newName" type="text" placeholder="例）〇〇マルシェ 1日目" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="newDate">日付</label>
+      <input id="newDate" type="date">
+    </div>
+    <button class="btn btn-primary" id="createBtn">このファイルを開く</button>
+  </div>
 
-  <script src="app.js"></script>
+  <p class="home-note">※ファイルを作成したら、先に在庫(頒布物)を登録してから数え始めるのがおすすめです。</p>
+
+  <div class="sectionhead"><h3>保存したファイル</h3><span id="fileCount"></span></div>
+  <ul class="filelist" id="fileList"></ul>
+</section>
+
+<!-- ===== EDITOR ===== -->
+<section id="editor" class="app hidden">
+  <div class="topbar">
+    <button class="back" id="backBtn">‹ 一覧</button>
+    <h1 id="sessTitle">—</h1>
+    <span class="date num" id="sessDate"></span>
+    <button class="hamb" data-menu aria-label="メニューを開く" style="width:38px;height:38px"><span></span><span></span><span></span></button>
+  </div>
+
+  <div id="lockBanner" class="banner hidden">🔒 このファイルは記録済みです。編集はできません。</div>
+
+  <div id="addPanel" class="panel" style="margin-top:16px">
+    <h3>商品を追加</h3>
+    <div class="field">
+      <label for="itemName">商品名</label>
+      <input id="itemName" type="text" placeholder="未入力可" autocomplete="off">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="itemPrice">値段（円）</label>
+        <input id="itemPrice" type="number" inputmode="numeric" placeholder="0" min="0" step="1">
+      </div>
+      <div class="field">
+        <label for="itemStock">在庫数</label>
+        <input id="itemStock" type="number" inputmode="numeric" placeholder="未入力可" min="0" step="1">
+      </div>
+    </div>
+    <div class="field">
+      <label>種類</label>
+      <div class="segbtns" id="itemKindSeg">
+        <button type="button" class="seg on" data-kind="">未設定</button>
+        <button type="button" class="seg" data-kind="新刊">新刊</button>
+        <button type="button" class="seg" data-kind="既刊">既刊</button>
+        <button type="button" class="seg" data-kind="委託">委託</button>
+      </div>
+    </div>
+    <button class="btn btn-ghost" id="addItemBtn">リストに追加</button>
+  </div>
+
+  <div class="sectionhead"><h3>商品リスト</h3><span>タップすると計算できます</span></div>
+  <div id="itemList"></div>
+</section>
+
+<!-- ===== INVENTORY ===== -->
+<section id="inventory" class="app hidden">
+  <div class="homebar">
+    <button class="hamb" data-menu aria-label="メニューを開く"><span></span><span></span><span></span></button>
+  </div>
+  <div class="hero">
+    <div class="eyebrow">在庫管理</div>
+    <h2>在庫管理</h2>
+    <p>頒布物を登録して、イベントごとに在庫を管理します。</p>
+  </div>
+
+  <div class="panel">
+    <h3>頒布物を登録</h3>
+    <div class="field">
+      <label for="invTitle">タイトル</label>
+      <input id="invTitle" type="text" placeholder="例）新刊「はるのいろ」" autocomplete="off">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="invPrice">単価（円）</label>
+        <input id="invPrice" type="number" inputmode="numeric" placeholder="0" min="0" step="1">
+      </div>
+      <div class="field">
+        <label for="invStock">在庫数</label>
+        <input id="invStock" type="number" inputmode="numeric" placeholder="未入力可" min="0" step="1">
+      </div>
+    </div>
+    <div class="field">
+      <label>種類</label>
+      <div class="segbtns" id="invKindSeg">
+        <button type="button" class="seg on" data-k="新刊">新刊</button>
+        <button type="button" class="seg" data-k="既刊">既刊</button>
+        <button type="button" class="seg" data-k="委託">委託</button>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="invDate">日付</label>
+        <input id="invDate" type="date">
+      </div>
+      <div class="field">
+        <label for="invEvent">イベント名</label>
+        <input id="invEvent" type="text" placeholder="例）〇〇マルシェ" autocomplete="off">
+      </div>
+    </div>
+    <button class="btn btn-ghost" id="invAddBtn">在庫に追加</button>
+  </div>
+
+  <div class="invtools">
+    <input id="invSearch" type="search" placeholder="タイトル・イベント名で絞り込み" autocomplete="off">
+    <div class="segbtns" id="invKindFilter">
+      <button type="button" class="seg on" data-kf="">すべて</button>
+      <button type="button" class="seg" data-kf="新刊">新刊</button>
+      <button type="button" class="seg" data-kf="既刊">既刊</button>
+      <button type="button" class="seg" data-kf="委託">委託</button>
+    </div>
+  </div>
+  <div id="invList"></div>
+</section>
+
+<!-- ===== UTILITY ===== -->
+<section id="utility" class="app hidden">
+  <div class="homebar">
+    <button class="hamb" data-menu aria-label="メニューを開く"><span></span><span></span><span></span></button>
+  </div>
+  <div class="hero">
+    <div class="eyebrow">ユーティリティ</div>
+    <h2>ユーティリティ</h2>
+    <p>CSV出力・バックアップ・外部出力の設定。</p>
+  </div>
+
+  <div class="panel">
+    <h3>CSV出力</h3>
+    <p class="u-desc">記録した売上をCSVファイルで書き出します。Excelやスプレッドシートで開けます。</p>
+    <button class="btn btn-primary" id="csvAllBtn">すべての記録をCSV出力</button>
+    <div style="height:8px"></div>
+    <button class="btn btn-ghost" id="csvCopyBtn">CSVをコピー（貼り付け用）</button>
+  </div>
+
+  <div class="panel">
+    <h3>バックアップ / 引き継ぎ</h3>
+    <p class="u-desc">記録はこの端末内に保存されます。別の端末へ移すときは、書き出したデータを移動先で読み込んでください。</p>
+    <button class="btn btn-primary" id="bkExportBtn">バックアップfileを保存</button>
+    <div style="height:8px"></div>
+    <button class="btn btn-ghost" id="bkExportCopyBtn">データをコピー</button>
+    <div style="height:16px"></div>
+    <button class="btn btn-primary" id="bkImportBtn">バックアップfileを選ぶ</button>
+    <div style="height:8px"></div>
+    <textarea id="bkPasteArea" class="bk-ta" placeholder="コピーしたデータをここに貼り付け" spellcheck="false"></textarea>
+    <button class="btn btn-ghost" id="bkPasteBtn">貼り付けたデータを読み込む</button>
+  </div>
+
+  <div class="panel">
+    <h3>外部出力</h3>
+    <p class="u-desc">別端末の「外部出力ツール」に、計算中の内容をリアルタイムで表示します。</p>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-title">外部出力を有効にする</div>
+        <div class="toggle-sub" id="extStateSub">OFF（単独動作）</div>
+      </div>
+      <button type="button" class="toggle" id="extToggle" role="switch" aria-checked="false"><span class="knob"></span></button>
+    </div>
+    <div id="extPanel" class="ext-panel hidden">
+      <div class="ext-status" id="extStatus">未接続</div>
+      <button class="btn btn-ghost" id="qrScanBtn">QRコードを読み取って接続</button>
+      <div style="height:8px"></div>
+      <div class="field" style="margin-bottom:0">
+        <label for="pinInput">PINコードを直接入力</label>
+        <input id="pinInput" type="text" inputmode="numeric" maxlength="8" placeholder="8桁のPIN" autocomplete="off">
+      </div>
+      <div style="height:8px"></div>
+      <button class="btn btn-ghost" id="pinConnectBtn">このPINで接続</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER (total) ===== -->
+<div class="footer hidden" id="footer">
+  <div class="footer-in">
+    <div class="tot">
+      <div class="lbl" id="totLabel">暫定合計</div>
+      <div class="val num" id="totVal"><small>¥</small>0</div>
+      <div class="sub" id="totSub">0点</div>
+    </div>
+    <div class="footer-btns">
+      <button class="checkout hidden" id="checkoutBtn">会計完了</button>
+      <button class="finish" id="finishBtn">終了する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB BAR ===== -->
+<nav class="tabbar hidden" id="tabbar">
+  <button type="button" class="tab on" data-view="inventory"><span class="ti">📦</span><span class="tl">在庫管理</span></button>
+  <button type="button" class="tab" data-view="home"><span class="ti">🧮</span><span class="tl">計算</span></button>
+  <button type="button" class="tab" data-view="utility"><span class="ti">⚙️</span><span class="tl">ユーティリティ</span></button>
+</nav>
+
+<!-- QR scanner overlay -->
+<div id="qrRoot"></div>
+
+<div class="toast" id="toast"></div>
+<div id="dialogRoot"></div>
+<div id="menuRoot"></div>
+
+<script>
+/* 外部ディスプレイ（sale-sync.pages.dev）接続先。別ドメインのため明示指定。 */
+window.SALESYNC_API = "https://sale-sync.pages.dev/api";
+</script>
+<script>
+/* ============================================================
+   sync-sender.js（インライン同梱） — 外部ディスプレイへ計算内容を送信。
+   ・SalesSync.connectWithPin(pin) / SalesSync.update({title,items,total})
+   ・items は {name, price, qty, kind}（kind は種類:新刊/既刊、任意）
+   ============================================================ */
+(function (global) {
+  const CONFIG = {
+    API_BASE: (global.SALESYNC_API || "/api"),
+    PUSH_DEBOUNCE_MS: 700,
+  };
+  const KEY = "salesync.sender";
+  let sess = load();
+  let lastState = null, pushTimer = null;
+
+  function load(){ try{ return JSON.parse(localStorage.getItem(KEY) || "null"); }catch(e){ return null; } }
+  function save(s){ sess = s; try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){} }
+  function drop(){ sess = null; try{ localStorage.removeItem(KEY); }catch(e){} }
+  function active(){ return !!(sess && sess.expiresAt && Date.now() < sess.expiresAt); }
+
+  async function api(path, opts){
+    const res = await fetch(CONFIG.API_BASE + path, { headers:{ "Content-Type":"application/json" }, ...opts });
+    return res.json().catch(()=>({}));
+  }
+  function normalize(s){
+    const items = (s.items||[]).map(function(it){
+      return { name:String(it.name==null?"":it.name), price:Number(it.price)||0,
+               qty:Number(it.qty)||0, kind:String(it.kind==null?"":it.kind) }; // kind を保持
+    });
+    const total = Number.isFinite(s.total) ? s.total : items.reduce(function(a,it){ return a+it.price*it.qty; },0);
+    return { title: s.title!=null ? String(s.title) : undefined, items:items, total:total };
+  }
+  function update(state){
+    lastState = normalize(state);
+    if(!active()) return;
+    if(pushTimer) return;
+    pushTimer = setTimeout(flush, CONFIG.PUSH_DEBOUNCE_MS);
+  }
+  async function flush(){
+    pushTimer = null;
+    if(!active() || !lastState) return;
+    try{
+      const r = await api("/state/push", { method:"POST", body: JSON.stringify({
+        sessionId: sess.sessionId, sellerToken: sess.sellerToken, state: lastState }) });
+      if(r && r.error === "expired"){ drop(); }
+    }catch(e){}
+  }
+  async function connectWithPin(pin){
+    pin = String(pin||"").replace(/\D/g,"");
+    if(pin.length !== 8) return false;
+    const r = await api("/pair/claim", { method:"POST", body: JSON.stringify({ pin:pin }) });
+    if(r && r.sessionId){
+      save({ sessionId:r.sessionId, sellerToken:r.sellerToken, expiresAt:r.expiresAt });
+      if(lastState){ flush(); }
+      return true;
+    }
+    return false;
+  }
+  global.SalesSync = { update:update, connectWithPin:connectWithPin, disconnect:drop, isActive:active, _config:CONFIG };
+})(window);
+</script>
+<script>
+(function(){
+"use strict";
+
+/* ---------- storage (アプリ内→localStorage→メモリ) ---------- */
+var mem = {};
+var backend = (function(){
+  try{ if(typeof window.storage !== "undefined" && window.storage) return "app"; }catch(e){}
+  try{ localStorage.setItem("__t","1"); localStorage.removeItem("__t"); return "local"; }catch(e){}
+  return "mem";
+})();
+var hasStore = backend === "app";
+async function sget(k){
+  try{
+    if(backend === "app"){ var r = await window.storage.get(k); return r ? JSON.parse(r.value) : null; }
+    if(backend === "local"){ var v = localStorage.getItem(k); return v ? JSON.parse(v) : null; }
+  }catch(e){}
+  return mem[k] !== undefined ? mem[k] : null;
+}
+async function sset(k,v){
+  try{
+    if(backend === "app"){ await window.storage.set(k, JSON.stringify(v)); return true; }
+    if(backend === "local"){ localStorage.setItem(k, JSON.stringify(v)); return true; }
+  }catch(e){ mem[k]=v; return false; }
+  mem[k]=v; return true;
+}
+async function sdel(k){
+  try{
+    if(backend === "app"){ await window.storage.delete(k); }
+    else if(backend === "local"){ localStorage.removeItem(k); }
+  }catch(e){}
+  delete mem[k];
+}
+/* 同期保存（ページを閉じる直前の保険用） */
+function ssetSync(k,v){
+  try{ if(backend === "local"){ localStorage.setItem(k, JSON.stringify(v)); return; } }catch(e){}
+  mem[k]=v;
+}
+
+var IDX = "sales:index";
+var LAST = "sales:lastOpen";
+var KEY = function(id){ return "sales:session:" + id; };
+
+/* ---------- state ---------- */
+var index = [];
+var sess = null;
+var selId = null;
+var lastTotal = 0;
+
+/* ---------- utils ---------- */
+var $ = function(id){ return document.getElementById(id); };
+var yen = function(n){ return "¥" + Number(n||0).toLocaleString("ja-JP"); };
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function todayISO(){
+  var d = new Date(), p = function(x){ return String(x).padStart(2,"0"); };
+  return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
+}
+function fmtDate(iso){
+  if(!iso) return "";
+  var p = iso.split("-");
+  return p.length===3 ? (p[1]*1)+"/"+(p[2]*1) : iso;
+}
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+var toastT;
+function toast(msg){
+  var t = $("toast"); t.textContent = msg; t.classList.add("on");
+  clearTimeout(toastT); toastT = setTimeout(function(){ t.classList.remove("on"); }, 1800);
+}
+function total(s){
+  return (s.items||[]).reduce(function(a,i){ return a + i.price * i.qty; }, 0);
+}
+function count(s){
+  return (s.items||[]).reduce(function(a,i){ return a + i.qty; }, 0);
+}
+
+/* ---------- home ---------- */
+async function loadIndex(){
+  index = (await sget(IDX)) || [];
+  renderHome();
+  var lastId = await sget(LAST);
+  if(lastId){
+    var s = await sget(KEY(lastId));
+    if(s && !s.locked){ openEditor(s); return; }
+    sdel(LAST);
+  }
+}
+function renderHome(){
+  var list = $("fileList");
+  $("fileCount").textContent = index.length ? index.length + "件" : "";
+  if(!index.length){
+    list.innerHTML = '<li class="empty">まだファイルがありません。<br>上のフォームから作成してください。</li>';
+    return;
+  }
+  var sorted = index.slice().sort(function(a,b){
+    return (b.date||"").localeCompare(a.date||"") || b.createdAt - a.createdAt;
+  });
+  list.innerHTML = sorted.map(function(f){
+    return '<li><button class="filecard" data-open="'+f.id+'">'+
+      '<div class="fmeta">'+
+        '<div class="fname">'+
+          '<span class="badge '+(f.locked?"done":"open")+'">'+(f.locked?"記録済":"作成中")+'</span>'+
+          esc(f.name)+
+        '</div>'+
+        '<div class="fsub num">'+esc(f.date||"日付なし")+'</div>'+
+      '</div>'+
+      '<div class="ftotal num">'+yen(f.total)+'</div>'+
+    '</button></li>';
+  }).join("");
+}
+
+/* ---------- editor ---------- */
+function openEditor(s){
+  sess = s; selId = null; lastTotal = -1;
+  sset(LAST, s.id);
+  $("home").classList.add("hidden");
+  $("inventory").classList.add("hidden");
+  $("utility").classList.add("hidden");
+  $("tabbar").classList.add("hidden");
+  $("editor").classList.remove("hidden");
+  $("footer").classList.remove("hidden");
+  $("sessTitle").textContent = s.name;
+  $("sessDate").textContent = s.date || "";
+  $("lockBanner").classList.toggle("hidden", !s.locked);
+  $("addPanel").classList.toggle("hidden", !!s.locked);
+  $("footer").classList.toggle("locked", !!s.locked);
+  $("finishBtn").disabled = !!s.locked;
+  $("finishBtn").textContent = s.locked ? "記録済み" : "終了する";
+  $("totLabel").textContent = s.locked ? "確定合計" : "暫定合計";
+  if(!s.checkoutBase) s.checkoutBase = {};
+  updateCheckoutBtn();
+  setItemKind("");
+  renderItems(); renderTotal();
+  extPush();
+  window.scrollTo(0,0);
+}
+function backHome(){
+  sess = null; selId = null;
+  sdel(LAST);
+  $("editor").classList.add("hidden");
+  $("footer").classList.add("hidden");
+  showView("home");
+  renderHome();
+}
+/* ---------- タブ / ビュー切替 ---------- */
+var curView = "home";
+function showView(name){
+  curView = name;
+  $("editor").classList.add("hidden");
+  $("footer").classList.add("hidden");
+  ["home","inventory","utility"].forEach(function(v){
+    $(v).classList.toggle("hidden", v !== name);
+  });
+  $("tabbar").classList.remove("hidden");
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(t){
+    t.classList.toggle("on", t.dataset.view === name);
+  });
+  if(name === "inventory") renderInventory();
+  if(name === "utility") refreshExtUI();
+  window.scrollTo(0,0);
+}
+document.addEventListener("click", function(e){
+  var tab = e.target.closest(".tab[data-view]");
+  if(tab){ showView(tab.dataset.view); }
+});
+function renderItems(){
+  var el = $("itemList");
+  if(!sess.items.length){
+    el.innerHTML = '<div class="empty">'+(sess.locked
+      ? "商品が登録されないまま記録されました。"
+      : "商品がまだありません。<br>上のフォームから追加してください。")+'</div>';
+    return;
+  }
+  el.innerHTML = sess.items.map(function(it){
+    var sel = it.id === selId && !sess.locked;
+    var hasStock = typeof it.stock === "number";
+    var left = hasStock ? it.stock - it.qty : null;
+    var out = hasStock && left <= 0;
+    var stockTxt = hasStock
+      ? '<span class="stock'+(out?" out":(left<=3?" low":""))+'">残り '+left+'</span>'
+      : '<span class="stock none">在庫管理なし</span>';
+    return '<div class="item'+(sel?" sel":"")+'" data-id="'+it.id+'">'+
+      '<button class="item-head" data-sel="'+it.id+'">'+
+        '<div class="item-name"><div class="n">'+esc(it.name)+'</div>'+
+          '<div class="p num">'+yen(it.price)+' / 点　'+stockTxt+'</div></div>'+
+        '<div class="item-qty">×<b class="num">'+it.qty+'</b></div>'+
+        '<div class="item-sub num">'+yen(it.price*it.qty)+'</div>'+
+      '</button>'+
+      '<div class="pad">'+
+        '<div class="padtag">計算中'+(hasStock?'　／　残り '+left+' 点':'')+'</div>'+
+        '<div class="padrow">'+
+          '<button class="step minus" data-minus="'+it.id+'"'+(it.qty<=0?" disabled":"")+'>−</button>'+
+          '<div class="padcount num">'+it.qty+'</div>'+
+          '<button class="step plus" data-plus="'+it.id+'"'+(out?" disabled":"")+'>＋</button>'+
+        '</div>'+
+        (out?'<div class="soldout">在庫がなくなりました</div>':'')+
+        '<div class="itemtools"><button data-del="'+it.id+'">この商品を削除</button></div>'+
+      '</div>'+
+    '</div>';
+  }).join("");
+}
+function renderTotal(){
+  var t = total(sess);
+  var v = $("totVal");
+  v.innerHTML = '<small>¥</small>' + t.toLocaleString("ja-JP");
+  if(t !== lastTotal && lastTotal !== -1){
+    v.classList.remove("bump"); void v.offsetWidth; v.classList.add("bump");
+  }
+  lastTotal = t;
+  $("totSub").textContent = count(sess) + "点 / " + sess.items.length + "商品";
+}
+async function persist(){
+  if(!sess) return;
+  await sset(KEY(sess.id), sess);
+  var row = index.find(function(f){ return f.id === sess.id; });
+  if(row){ row.total = total(sess); row.locked = sess.locked; row.name = sess.name; row.date = sess.date; }
+  await sset(IDX, index);
+}
+
+/* ---------- actions ---------- */
+$("newDate").value = todayISO();
+
+$("createBtn").addEventListener("click", async function(){
+  var name = $("newName").value.trim();
+  var date = $("newDate").value;
+  if(!name) name = date ? fmtDate(date) + " の売上" : "無題のファイル";
+  var s = { id: uid(), name: name, date: date, items: [], locked: false,
+            createdAt: Date.now(), closedAt: null };
+  index.push({ id: s.id, name: s.name, date: s.date, total: 0, locked: false, createdAt: s.createdAt });
+  await sset(KEY(s.id), s);
+  await sset(IDX, index);
+  $("newName").value = "";
+  openEditor(s);
+});
+
+$("fileList").addEventListener("click", async function(e){
+  if(suppressClick){ suppressClick = false; return; }
+  var b = e.target.closest("[data-open]");
+  if(!b) return;
+  var s = await sget(KEY(b.dataset.open));
+  if(!s){ toast("ファイルを読み込めませんでした"); return; }
+  openEditor(s);
+});
+
+/* 長押しで削除 */
+var pressTimer = null, pressed = null, suppressClick = false, startY = 0;
+function pressStart(e){
+  var card = e.target.closest("[data-open]");
+  if(!card) return;
+  startY = e.touches ? e.touches[0].clientY : e.clientY;
+  pressed = card; suppressClick = false;
+  card.classList.add("pressing");
+  pressTimer = setTimeout(function(){
+    pressTimer = null; suppressClick = true;
+    card.classList.remove("pressing");
+    if(navigator.vibrate) try{ navigator.vibrate(18); }catch(err){}
+    askDeleteFile(card.dataset.open);
+    setTimeout(function(){ suppressClick = false; }, 700);
+  }, 550);
+}
+function pressEnd(){
+  clearTimeout(pressTimer); pressTimer = null;
+  if(pressed){ pressed.classList.remove("pressing"); pressed = null; }
+}
+function pressMove(e){
+  var y = e.touches ? e.touches[0].clientY : e.clientY;
+  if(Math.abs(y - startY) > 10) pressEnd();
+}
+var fl = $("fileList");
+fl.addEventListener("touchstart", pressStart, {passive:true});
+fl.addEventListener("touchmove", pressMove, {passive:true});
+fl.addEventListener("touchend", pressEnd);
+fl.addEventListener("touchcancel", pressEnd);
+fl.addEventListener("mousedown", pressStart);
+fl.addEventListener("mousemove", pressMove);
+fl.addEventListener("mouseup", pressEnd);
+fl.addEventListener("mouseleave", pressEnd);
+fl.addEventListener("contextmenu", function(e){ e.preventDefault(); });
+
+function askDeleteFile(id){
+  var f = index.find(function(x){ return x.id === id; });
+  if(!f) return;
+  confirmDialog({
+    title: "このファイルを削除しますか？",
+    body: "削除すると元に戻せません。",
+    recap: '<div><span>'+esc(f.name)+'</span><span class="num">'+esc(f.date||"—")+'</span></div>'+
+           '<div class="big"><span>合計</span><span class="num">'+yen(f.total)+'</span></div>',
+    ok: "削除する", danger: true,
+    onOk: async function(){
+      index = index.filter(function(x){ return x.id !== id; });
+      await sdel(KEY(id));
+      await sset(IDX, index);
+      renderHome();
+      toast("削除しました");
+    }
+  });
+}
+
+$("backBtn").addEventListener("click", backHome);
+
+$("addItemBtn").addEventListener("click", async function(){
+  var name = $("itemName").value.trim();
+  var priceRaw = $("itemPrice").value;
+  var stockRaw = $("itemStock").value.trim();
+  var price = Math.max(0, Math.round(Number(priceRaw) || 0));
+  var stock = stockRaw === "" ? null : Math.max(0, Math.round(Number(stockRaw) || 0));
+  if(!name) name = "商品 " + (sess.items.length + 1);
+  var it = { id: uid(), name: name, price: price, qty: 0, stock: stock, kind: newItemKind };
+  sess.items.push(it);
+  selId = it.id;
+  $("itemName").value = ""; $("itemPrice").value = ""; $("itemStock").value = "";
+  setItemKind("");
+  renderItems(); renderTotal(); await persist();
+  extPush();
+  document.querySelector('[data-id="'+it.id+'"]').scrollIntoView({behavior:"smooth", block:"center"});
+});
+
+/* 種類セグメント */
+var newItemKind = "";
+function setItemKind(k){
+  newItemKind = k;
+  var seg = $("itemKindSeg");
+  if(!seg) return;
+  Array.prototype.forEach.call(seg.querySelectorAll("[data-kind]"), function(b){
+    b.classList.toggle("on", b.dataset.kind === k);
+  });
+}
+$("itemKindSeg").addEventListener("click", function(e){
+  var b = e.target.closest("[data-kind]"); if(!b) return;
+  setItemKind(b.dataset.kind);
+});
+
+$("itemStock").addEventListener("keydown", function(e){
+  if(e.key === "Enter") $("addItemBtn").click();
+});
+
+$("itemPrice").addEventListener("keydown", function(e){
+  if(e.key === "Enter") $("addItemBtn").click();
+});
+
+$("itemList").addEventListener("click", async function(e){
+  if(sess.locked) return;
+  var t = e.target;
+  var sel = t.closest("[data-sel]"), plus = t.closest("[data-plus]"),
+      minus = t.closest("[data-minus]"), del = t.closest("[data-del]");
+
+  if(plus || minus){
+    var id = (plus||minus).dataset.plus || (plus||minus).dataset.minus;
+    var it = sess.items.find(function(x){ return x.id === id; });
+    if(!it) return;
+    if(plus && typeof it.stock === "number" && it.qty >= it.stock){
+      toast("在庫がありません"); return;
+    }
+    it.qty = Math.max(0, it.qty + (plus ? 1 : -1));
+    renderItems(); renderTotal(); await persist();
+    extPush();
+    return;
+  }
+  if(del){
+    var it2 = sess.items.find(function(x){ return x.id === del.dataset.del; });
+    confirmDialog({
+      title: "この商品を削除しますか？",
+      body: "「"+esc(it2.name)+"」と数えた "+it2.qty+"点 が消えます。",
+      ok: "削除する", danger: true,
+      onOk: async function(){
+        sess.items = sess.items.filter(function(x){ return x.id !== del.dataset.del; });
+        if(selId === del.dataset.del) selId = null;
+        renderItems(); renderTotal(); await persist(); toast("削除しました");
+      }
+    });
+    return;
+  }
+  if(sel){
+    selId = (selId === sel.dataset.sel) ? null : sel.dataset.sel;
+    renderItems();
+    if(selId){
+      var card = document.querySelector('[data-id="'+selId+'"]');
+      if(card) card.scrollIntoView({behavior:"smooth", block:"center"});
+    }
+  }
+});
+
+/* ---------- finish ---------- */
+$("finishBtn").addEventListener("click", function(){
+  if(sess.locked) return;
+  // 未確定の会計分があれば最後の1会計として記録
+  var open = currentCheckout();
+  if(open.total > 0){
+    if(!sess.checkoutBase) sess.checkoutBase = {};
+    (sess.items||[]).forEach(function(it){ sess.checkoutBase[it.id] = it.qty; });
+    if(!sess.checkouts) sess.checkouts = [];
+    sess.checkouts.push({ amount:open.total, count:open.items.reduce(function(a,i){return a+i.qty;},0), ts:Date.now() });
+  }
+  var t = total(sess), c = count(sess);
+  var nCheckouts = (sess.checkouts||[]).length;
+  confirmDialog({
+    title: "この内容で終了しますか？",
+    body: "終了すると保存され、あとから編集できません。",
+    recap: '<div><span>'+esc(sess.name)+'</span><span class="num">'+esc(sess.date||"—")+'</span></div>'+
+           (nCheckouts ? '<div><span>会計数</span><span class="num">'+nCheckouts+'回</span></div>' : '')+
+           '<div><span>点数</span><span class="num">'+c+'点</span></div>'+
+           '<div class="big"><span>売上合計</span><span class="num">'+yen(t)+'</span></div>',
+    ok: "終了して保存する",
+    onOk: async function(){
+      sess.locked = true; sess.closedAt = Date.now(); selId = null;
+      await persist();
+      openEditor(sess);
+      toast("記録しました");
+    }
+  });
+});
+
+/* ---------- dialog ---------- */
+function confirmDialog(o){
+  var root = $("dialogRoot");
+  root.innerHTML =
+    '<div class="scrim"><div class="dialog" role="dialog" aria-modal="true">'+
+      '<h4>'+o.title+'</h4>'+
+      '<p>'+o.body+'</p>'+
+      (o.recap ? '<div class="recap">'+o.recap+'</div>' : '')+
+      '<div class="acts">'+
+        '<button class="btn '+(o.danger?"btn-danger":"btn-primary")+'" id="dlgOk">'+o.ok+'</button>'+
+        '<button class="btn btn-ghost" id="dlgNo">キャンセル</button>'+
+      '</div>'+
+    '</div></div>';
+  var close = function(){ root.innerHTML = ""; };
+  $("dlgNo").addEventListener("click", close);
+  $("dlgOk").addEventListener("click", function(){ close(); o.onOk(); });
+  root.querySelector(".scrim").addEventListener("click", function(e){
+    if(e.target === this) close();
+  });
+  $("dlgOk").focus();
+}
+
+/* ---------- menu ---------- */
+var APP_VER = "Ver.1.8";
+var X_ID = "H4ru_ycy";
+var MAIL = "h4ru.kyi2943@gmail.com";
+var THEME_KEY = "sales:theme";
+
+/* ---------- theme ---------- */
+var THEMES = [
+  ["light", "ライト（通常）", "sw-light", "明るい標準の表示"],
+  ["dark",  "ダーク",        "sw-dark",  "暗めで目にやさしい"],
+  ["navy",  "ネイビー",      "sw-navy",  "落ち着いた濃紺"],
+  ["mocha", "モカ",          "sw-mocha", "あたたかみのある茶系"],
+  ["auto",  "端末に合わせる","sw-auto",  "スマホの設定に自動で追従"]
+];
+var themeMode = "light";
+var mql = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+function applyTheme(){
+  var t = themeMode;
+  if(t === "auto") t = (mql && mql.matches) ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", t);
+}
+function setTheme(mode){
+  themeMode = mode; applyTheme();
+  try{ localStorage.setItem(THEME_KEY, JSON.stringify(mode)); }catch(e){}
+}
+function themeLabel(){
+  for(var i=0;i<THEMES.length;i++){ if(THEMES[i][0]===themeMode) return THEMES[i][1]; }
+  return "ライト（通常）";
+}
+if(mql && mql.addEventListener){ mql.addEventListener("change", function(){ if(themeMode==="auto") applyTheme(); }); }
+try{ var _pt = localStorage.getItem(THEME_KEY); if(_pt){ themeMode = JSON.parse(_pt); applyTheme(); } }catch(e){}
+
+function sheet(title, inner, backTo){
+  $("menuRoot").innerHTML =
+    '<div class="sheetwrap"><div class="bg" data-close></div><div class="sheet" role="dialog" aria-modal="true">'+
+      '<div class="sheet-top">'+
+        (backTo ? '<button class="sheet-close" data-back aria-label="戻る">‹</button>' : '')+
+        '<h3>'+title+'</h3>'+
+        '<button class="sheet-close" data-close aria-label="閉じる">✕</button>'+
+      '</div>'+ inner +
+    '</div></div>';
+}
+function closeSheet(){ $("menuRoot").innerHTML = ""; }
+
+function menuHome(){
+  sheet("メニュー",
+    '<button class="menu-item" data-go="help"><span class="ic">？</span>使い方<span class="chev">›</span></button>'+
+    '<button class="menu-item" data-go="theme"><span class="ic">◐</span>表示モード<span class="chev">'+themeLabel()+' ›</span></button>'+
+    '<button class="menu-item" data-go="contact"><span class="ic">✉</span>お問い合わせ<span class="chev">›</span></button>'+
+    '<div class="sheet-ver">売上計算ツール '+APP_VER+'</div>'+
+    '<div class="menu-foot"><button class="verhist-btn" data-go="history">バージョン履歴 ›</button></div>');
+}
+function menuHistory(){
+  var log = [
+    ["Ver.1.8", "最新", [
+      "外部出力をレジ方式に変更：外部ディスプレイは「今の会計」だけを表示（売上総額は表示しない）",
+      "計算画面に「会計完了」ボタンを追加（外部出力ON時）。押すと1会計分を記録し、外部表示は¥0にリセット",
+      "手元の暫定合計・商品リスト・販売数は従来どおり累計のまま",
+      "終了時に会計数と売上合計を表示"
+    ]],
+    ["Ver.1.7", "", [
+      "在庫管理を「頒布物の登録場所」に刷新（タイトル・単価・在庫数・種類・日付・イベント名）",
+      "頒布物をカード表示し、長押しで編集・削除できるように",
+      "種類に「委託」を追加（在庫管理・ホーム共通）",
+      "在庫はイベントごとに独立して管理"
+    ]],
+    ["Ver.1.6", "", [
+      "外部ディスプレイ（sale-sync）とのリアルタイム同期に対応",
+      "8桁PIN／QRコードで接続し、計算中の内容を約0.7秒ごとに送信",
+      "商品の種類（新刊／既刊）も外部ディスプレイへ送信",
+      "接続情報を保存し、9時間有効・次回起動時も同期を継続"
+    ]],
+    ["Ver.1.5", "", [
+      "画面下部にタブバーを追加（ホーム／在庫管理／ユーティリティ）",
+      "在庫管理：登録した全商品を横断一覧・検索・種類で絞り込み",
+      "商品に種類（新刊／既刊）を登録できるように",
+      "CSV出力に対応（Excel等で開けるファイル書き出し・コピー）",
+      "バックアップ / 引き継ぎ（別端末へのデータ移行）を追加",
+      "外部出力：ON/OFFトグルとQRコード読み取り（PIN接続）の土台を追加"
+    ]],
+    ["Ver.1.4", "", [
+      "メニューのどの項目を選んでも表示モード画面が開いてしまう不具合を修正"
+    ]],
+    ["Ver.1.3", "", [
+      "記録の保存を強化し、ページを閉じても消えないように（端末内に保存）",
+      "次に開いたとき、作業していたファイルを自動で開いて続きから再開",
+      "アプリを切り替えた瞬間・タブを閉じる直前にも自動保存",
+      "ホーム画面に追加するとアプリのように全画面で起動"
+    ]],
+    ["Ver.1.2", "", [
+      "表示モードを追加（ライト／ダーク／ネイビー／モカ／端末に合わせる）",
+      "選んだモードを保存し、次回起動時も維持",
+      "画面全体を配色対応にして各モードで見やすく調整"
+    ]],
+    ["Ver.1.1", "", [
+      "商品ごとに在庫数を登録できるように",
+      "「＋」で在庫が減り、「－」で戻る（残り数・完売表示つき）",
+      "保存したファイルを長押しで削除できるように",
+      "使い方の説明を更新"
+    ]],
+    ["Ver.1.0", "初期リリース", [
+      "商品名・値段を登録し、「＋」「－」で計算",
+      "暫定合計金額をリアルタイム表示",
+      "商品をタップで選択・強調して計算",
+      "日程ごとにファイル分け（ファイル名・日付を入力）",
+      "「終了」ボタンで保存（確認ダイアログつき・以降編集不可）",
+      "ハンバーガーメニュー（使い方・お問い合わせ）を搭載"
+    ]]
+  ];
+  var body = '<div class="changelog">' + log.map(function(v){
+    var tag = v[1] ? '<span class="cl-tag'+(v[1]==="最新"?" now":"")+'">'+v[1]+'</span>' : '';
+    var items = v[2].map(function(t){ return '<li>'+t+'</li>'; }).join("");
+    return '<div class="cl-item"><div class="cl-head"><span class="cl-ver">'+v[0]+'</span>'+tag+'</div>'+
+           '<ul class="cl-list">'+items+'</ul></div>';
+  }).join("") + '</div>'+
+  '<div class="sheet-ver">売上計算ツール '+APP_VER+'</div>';
+  sheet("バージョン履歴", body, true);
+}
+function menuTheme(){
+  var opts = THEMES.map(function(t){
+    return '<button class="themeopt'+(themeMode===t[0]?" on":"")+'" data-settheme="'+t[0]+'">'+
+      '<span class="sw '+t[2]+'"></span>'+
+      '<span>'+t[1]+'<span class="themedesc">'+t[3]+'</span></span>'+
+      (themeMode===t[0]?'<span class="mark">✓</span>':'')+
+    '</button>';
+  }).join("");
+  sheet("表示モード",
+    opts + '<div class="note">選んだモードは保存され、次に開いたときも同じ表示になります。</div>', true);
+}
+function menuHelp(){
+  sheet("使い方",
+    '<div class="note" style="margin-top:0"><b>おすすめの手順</b>'+
+      'ファイルを作ったら、まず先に在庫（頒布物）をすべて登録してから数え始めるとスムーズです。'+
+      'イベント中に慌てて登録せずに済みます。</div>'+
+    '<ol class="howto" style="margin-top:10px">'+
+      '<li><b>ファイルを作る</b>ファイル名と日付を入れて「このファイルを開く」。日程やイベントごとに分けて記録できます。</li>'+
+      '<li><b>在庫（頒布物）を登録する</b>商品名・値段・在庫数・種類（新刊／既刊）を入れて「リストに追加」。商品名・在庫数・種類は未入力でもOK（在庫を入れない場合は在庫管理なし）。</li>'+
+      '<li><b>商品を選ぶ</b>商品カードをタップすると、その商品が黄色で強調され計算パッドが開きます。</li>'+
+      '<li><b>数える</b>売れたら「＋」で在庫が1つ減ります。間違えたら「－」で取り消し、在庫も戻ります。下のバーに暫定合計がすぐ反映されます。</li>'+
+      '<li><b>終了する</b>「終了する」を押すと確認画面が出ます。保存後は編集できません。</li>'+
+    '</ol>'+
+    '<div class="note"><b>下のタブについて</b>'+
+      '・<b style="display:inline">計算</b>：ファイルの作成・一覧と、頒布物を数える画面。<br>'+
+      '・<b style="display:inline">在庫管理</b>：登録した全商品を横断で一覧。タイトルやイベント名で検索、新刊／既刊で絞り込みできます。<br>'+
+      '・<b style="display:inline">ユーティリティ</b>：CSV出力・バックアップ・外部出力の設定。</div>'+
+    '<div class="note" style="margin-top:10px"><b>CSV出力（ユーティリティ）</b>'+
+      '・すべての記録をCSVファイルで書き出せます。Excelやスプレッドシートで開けます。<br>'+
+      '・fileが使えない環境では「コピー」で貼り付け用に出力できます。</div>'+
+    '<div class="note" style="margin-top:10px"><b>バックアップ / 引き継ぎ（ユーティリティ）</b>'+
+      '・記録はこの端末内に保存されます。別の端末へ移すときは、ここで書き出したデータを移動先で読み込みます。<br>'+
+      '・fileの保存／コピーのどちらでも移せます。</div>'+
+    '<div class="note" style="margin-top:10px"><b>外部出力（ユーティリティ）</b>'+
+      '・別端末の「外部ディスプレイ」に、計算中の合計や商品をリアルタイム表示できます。<br>'+
+      '・使い方：トグルをON →「QRコードを読み取って接続」またはディスプレイに出た<b style="display:inline">8桁のPIN</b>を入力。<br>'+
+      '・接続後は、＋／－や商品追加が自動でディスプレイに反映されます（認証は1日1回・9時間有効）。<br>'+
+      '・単独で使うときはOFFのままでOKです。</div>'+
+    '<div class="note" style="margin-top:10px"><b>在庫について</b>'+
+      '・カードに「残り〇」と表示されます。残り3以下で黄色、0で赤色になります。<br>'+
+      '・在庫が0になると「＋」は押せなくなります。<br>'+
+      '・在庫数を入れずに追加すれば、在庫を気にせず数えられます。</div>'+
+    '<div class="note" style="margin-top:10px"><b>覚えておくと便利</b>'+
+      '・操作するたび自動保存されるので、途中で閉じても続きから開けます。<br>'+
+      '・一覧に戻っても記録は消えません。「作成中」のファイルはあとから再開できます。<br>'+
+      '・<b style="display:inline">保存したファイルを長押しすると削除</b>できます（確認画面が出ます）。<br>'+
+      '・表示モード（ライト／ダーク／ネイビー／モカ）はメニューから切り替えられます。<br>'+
+      '・商品ごと消したいときは、選択中パネルの「この商品を削除」から。</div>', true);
+}
+function menuContact(){
+  sheet("お問い合わせ",
+    '<p class="contact-lead">不具合の報告やご要望は、下のどちらかからご連絡ください。</p>'+
+    '<a class="link-card" href="https://x.com/'+X_ID+'" target="_blank" rel="noopener noreferrer">'+
+      '<span class="ic">𝕏</span><span><span class="lc-t">X（旧Twitter）</span>'+
+      '<span class="lc-v">@'+X_ID+'</span></span></a>'+
+    '<a class="link-card" href="mailto:'+MAIL+'">'+
+      '<span class="ic">✉</span><span><span class="lc-t">メール</span>'+
+      '<span class="lc-v">'+MAIL+'</span></span></a>'+
+    '<div class="sheet-ver">売上計算ツール '+APP_VER+'</div>', true);
+}
+
+document.addEventListener("click", function(e){
+  if(e.target.closest("[data-menu]")){ menuHome(); return; }
+  var root = $("menuRoot");
+  if(!root.firstChild) return;
+  if(e.target.closest("[data-close]")){ closeSheet(); return; }
+  if(e.target.closest("[data-back]")){ menuHome(); return; }
+  var th = e.target.closest("[data-settheme]");
+  if(th){ setTheme(th.dataset.settheme); menuTheme(); return; }
+  var go = e.target.closest("[data-go]");
+  if(go){
+    var g = go.dataset.go;
+    if(g === "help") menuHelp();
+    else if(g === "theme") menuTheme();
+    else if(g === "history") menuHistory();
+    else menuContact();
+  }
+});
+document.addEventListener("keydown", function(e){
+  if(e.key === "Escape") closeSheet();
+});
+
+/* ページを離れる直前に、今の状態を確実に保存（バックグラウンド化・タブ終了の保険） */
+function safetySave(){
+  try{
+    if(sess){
+      ssetSync(KEY(sess.id), sess);
+      ssetSync(LAST, sess.id);
+      var row = index.find(function(f){ return f.id === sess.id; });
+      if(row){ row.total = total(sess); row.locked = sess.locked; }
+      ssetSync(IDX, index);
+    }
+  }catch(e){}
+}
+document.addEventListener("visibilitychange", function(){
+  if(document.visibilityState === "hidden") safetySave();
+});
+window.addEventListener("pagehide", safetySave);
+window.addEventListener("beforeunload", safetySave);
+
+/* ============ 在庫管理 ============ */
+async function allSessions(){
+  var out = [];
+  for(var i=0;i<index.length;i++){
+    var s = await sget(KEY(index[i].id));
+    if(s) out.push(s);
+  }
+  return out;
+}
+var invFilterKind = "", invQuery = "";
+
+/* 在庫ストア（在庫管理タブで一元登録。イベントごとに独立） */
+var INV_KEY = "sales:inventory";
+function loadInv(){ try{ return JSON.parse(localStorage.getItem(INV_KEY)||"[]"); }catch(e){ return []; } }
+function saveInv(){ try{ localStorage.setItem(INV_KEY, JSON.stringify(inventory)); }catch(e){} }
+var inventory = loadInv();
+
+function escAttr(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function invKindBadge(k){
+  if(k==="新刊") return '<span class="ir-kind k1">新刊</span>';
+  if(k==="既刊") return '<span class="ir-kind k2">既刊</span>';
+  if(k==="委託") return '<span class="ir-kind k3">委託</span>';
+  return "";
+}
+
+/* 登録フォーム */
+var invNewKind = "新刊";
+function setInvKind(k){
+  invNewKind = k;
+  var seg = $("invKindSeg"); if(!seg) return;
+  Array.prototype.forEach.call(seg.querySelectorAll("[data-k]"), function(b){ b.classList.toggle("on", b.dataset.k===k); });
+}
+$("invKindSeg").addEventListener("click", function(e){
+  var b = e.target.closest("[data-k]"); if(!b) return; setInvKind(b.dataset.k);
+});
+$("invAddBtn").addEventListener("click", function(){
+  var title = $("invTitle").value.trim();
+  if(!title){ toast("タイトルを入力してください"); return; }
+  var price = Math.max(0, Math.round(Number($("invPrice").value)||0));
+  var sr = $("invStock").value.trim();
+  var stock = sr==="" ? null : Math.max(0, Math.round(Number(sr)||0));
+  inventory.push({ id:uid(), title:title, price:price, stock:stock, kind:invNewKind,
+                   date:$("invDate").value, event:$("invEvent").value.trim(), createdAt:Date.now() });
+  saveInv();
+  $("invTitle").value=""; $("invPrice").value=""; $("invStock").value=""; $("invEvent").value=""; setInvKind("新刊");
+  renderInventory(); toast("在庫に追加しました");
+});
+
+function renderInventory(){
+  var host = $("invList");
+  var q = invQuery.trim().toLowerCase();
+  var rows = inventory.filter(function(it){
+    if(invFilterKind && it.kind !== invFilterKind) return false;
+    if(q) return ((it.title||"")+" "+(it.event||"")).toLowerCase().indexOf(q) >= 0;
+    return true;
+  }).slice().sort(function(a,b){ return (b.date||"").localeCompare(a.date||"") || (b.createdAt||0)-(a.createdAt||0); });
+  if(!rows.length){
+    host.innerHTML = '<div class="empty">'+(inventory.length ? "条件に合う頒布物がありません。" : "まだ頒布物が登録されていません。上のフォームから登録してください。")+'</div>';
+    return;
+  }
+  host.innerHTML = rows.map(function(it){
+    var stockTxt = it.stock===null ? "在庫管理なし" : ("在庫 "+ it.stock);
+    var meta = [];
+    if(it.date) meta.push('<span class="num">'+esc(it.date)+'</span>');
+    if(it.event) meta.push('<span>'+esc(it.event)+'</span>');
+    meta.push('<span class="ir-price num">'+yen(it.price)+'</span>');
+    meta.push('<span class="num">'+esc(stockTxt)+'</span>');
+    return '<div class="invrow" data-id="'+it.id+'">'+
+      '<div class="ir-top"><span class="ir-title">'+esc(it.title)+'</span>'+invKindBadge(it.kind)+'</div>'+
+      '<div class="ir-sub">'+ meta.join("") +'</div></div>';
+  }).join("");
+}
+$("invSearch").addEventListener("input", function(){ invQuery = this.value; renderInventory(); });
+$("invKindFilter").addEventListener("click", function(e){
+  var b = e.target.closest("[data-kf]"); if(!b) return;
+  invFilterKind = b.dataset.kf;
+  Array.prototype.forEach.call(this.querySelectorAll("[data-kf]"), function(x){ x.classList.toggle("on", x.dataset.kf===invFilterKind); });
+  renderInventory();
+});
+
+/* 頒布物カードを長押しで編集/削除 */
+var invPressTimer=null, invSuppress=false, invStartY=0;
+function openInvEdit(it){
+  sheet("頒布物を編集",
+    '<div class="inv-edit">'+
+      '<div class="field"><label>タイトル</label><input id="eTitle" type="text" value="'+escAttr(it.title)+'"></div>'+
+      '<div class="row2">'+
+        '<div class="field"><label>単価（円）</label><input id="ePrice" type="number" inputmode="numeric" value="'+it.price+'"></div>'+
+        '<div class="field"><label>在庫数</label><input id="eStock" type="number" inputmode="numeric" placeholder="未入力可" value="'+(it.stock===null?"":it.stock)+'"></div>'+
+      '</div>'+
+      '<div class="field"><label>種類</label><div class="segbtns" id="eKindSeg">'+
+        ['新刊','既刊','委託'].map(function(k){ return '<button type="button" class="seg'+(it.kind===k?' on':'')+'" data-k="'+k+'">'+k+'</button>'; }).join("")+
+      '</div></div>'+
+      '<div class="row2">'+
+        '<div class="field"><label>日付</label><input id="eDate" type="date" value="'+escAttr(it.date||"")+'"></div>'+
+        '<div class="field"><label>イベント名</label><input id="eEvent" type="text" value="'+escAttr(it.event||"")+'"></div>'+
+      '</div>'+
+      '<button class="btn btn-primary" id="eSave">保存する</button>'+
+      '<div style="height:10px"></div>'+
+      '<button class="btn btn-danger" id="eDel">この頒布物を削除</button>'+
+    '</div>');
+  var ek = it.kind;
+  $("eKindSeg").addEventListener("click", function(e){
+    var b=e.target.closest("[data-k]"); if(!b) return; ek=b.dataset.k;
+    Array.prototype.forEach.call(this.querySelectorAll("[data-k]"), function(x){ x.classList.toggle("on", x.dataset.k===ek); });
+  });
+  $("eSave").addEventListener("click", function(){
+    var t=$("eTitle").value.trim(); if(!t){ toast("タイトルを入力してください"); return; }
+    var sr=$("eStock").value.trim();
+    it.title=t; it.price=Math.max(0,Math.round(Number($("ePrice").value)||0));
+    it.stock = sr==="" ? null : Math.max(0, Math.round(Number(sr)||0));
+    it.kind=ek; it.date=$("eDate").value; it.event=$("eEvent").value.trim();
+    saveInv(); $("menuRoot").innerHTML=""; renderInventory(); toast("保存しました");
+  });
+  $("eDel").addEventListener("click", function(){
+    confirmDialog({ title:"削除しますか？", body:"「"+esc(it.title)+"」を在庫から削除します。この操作は取り消せません。",
+      ok:"削除する", danger:true, onOk:function(){
+        inventory = inventory.filter(function(x){ return x.id!==it.id; });
+        saveInv(); $("menuRoot").innerHTML=""; renderInventory(); toast("削除しました");
+      }});
+  });
+}
+function invPressStart(e){
+  var card = e.target.closest(".invrow[data-id]"); if(!card) return;
+  invStartY = e.touches ? e.touches[0].clientY : e.clientY;
+  invSuppress = false;
+  invPressTimer = setTimeout(function(){
+    invPressTimer=null; invSuppress=true;
+    if(navigator.vibrate){ try{ navigator.vibrate(18); }catch(err){} }
+    var it = inventory.find(function(x){ return x.id===card.dataset.id; });
+    if(it) openInvEdit(it);
+    setTimeout(function(){ invSuppress=false; }, 700);
+  }, 500);
+}
+function invPressEnd(){ clearTimeout(invPressTimer); invPressTimer=null; }
+function invPressMove(e){ var y=e.touches?e.touches[0].clientY:e.clientY; if(Math.abs(y-invStartY)>10) invPressEnd(); }
+(function(){
+  var il=$("invList");
+  il.addEventListener("touchstart", invPressStart, {passive:true});
+  il.addEventListener("touchmove", invPressMove, {passive:true});
+  il.addEventListener("touchend", invPressEnd);
+  il.addEventListener("touchcancel", invPressEnd);
+  il.addEventListener("mousedown", invPressStart);
+  il.addEventListener("mousemove", invPressMove);
+  il.addEventListener("mouseup", invPressEnd);
+  il.addEventListener("mouseleave", invPressEnd);
+  il.addEventListener("contextmenu", function(e){ e.preventDefault(); });
+})();
+
+/* ============ CSV出力 ============ */
+function csvCell(v){
+  v = (v===null||v===undefined) ? "" : String(v);
+  if(/[",\n]/.test(v)) v = '"' + v.replace(/"/g,'""') + '"';
+  return v;
+}
+async function buildCSV(){
+  var sessions = await allSessions();
+  var head = ["日付","ファイル名","商品名","種類","単価","在庫数","販売数","小計","状態"];
+  var lines = [head.join(",")];
+  sessions.forEach(function(s){
+    (s.items||[]).forEach(function(it){
+      lines.push([
+        csvCell(s.date), csvCell(s.name), csvCell(it.name), csvCell(it.kind||""),
+        csvCell(it.price), csvCell(typeof it.stock==="number"?it.stock:""),
+        csvCell(it.qty), csvCell(it.price*it.qty), csvCell(s.locked?"確定":"作成中")
+      ].join(","));
+    });
+  });
+  return lines.join("\r\n");
+}
+function stamp(){ var d=new Date(),p=function(x){return String(x).padStart(2,"0");};
+  return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+"-"+p(d.getHours())+p(d.getMinutes()); }
+$("csvAllBtn").addEventListener("click", async function(){
+  var csv = await buildCSV();
+  if(csv.split("\r\n").length<=1){ toast("出力するデータがありません"); return; }
+  var bom = "\ufeff"; // Excelで文字化けしないBOM
+  var ok=false;
+  try{
+    var blob = new Blob([bom+csv], {type:"text/csv;charset=utf-8"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href=url; a.download="uriage-"+stamp()+".csv";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); },4000); ok=true;
+  }catch(e){ ok=false; }
+  toast(ok ? "CSVを書き出しました" : "書き出せませんでした。コピーをお使いください");
+});
+$("csvCopyBtn").addEventListener("click", async function(){
+  var csv = await buildCSV();
+  if(csv.split("\r\n").length<=1){ toast("出力するデータがありません"); return; }
+  copyText(csv);
+});
+function copyText(text){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){ toast("コピーしました"); }, function(){ legacyCopy(text); });
+  } else legacyCopy(text);
+}
+function legacyCopy(text){
+  var ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0";
+  document.body.appendChild(ta); ta.select();
+  var ok=false; try{ ok=document.execCommand("copy"); }catch(e){}
+  document.body.removeChild(ta); toast(ok?"コピーしました":"コピーできませんでした");
+}
+
+/* ============ バックアップ / 引き継ぎ ============ */
+async function collectBackup(){
+  var folders = await allSessions();
+  return { app:"uriage-tool", ver:1, exportedAt:Date.now(), folders:folders };
+}
+$("bkExportBtn").addEventListener("click", async function(){
+  var data = await collectBackup();
+  if(!data.folders.length){ toast("書き出すデータがありません"); return; }
+  var json = JSON.stringify(data), ok=false;
+  try{
+    var blob=new Blob([json],{type:"application/json"}); var url=URL.createObjectURL(blob);
+    var a=document.createElement("a"); a.href=url; a.download="uriage-backup-"+stamp()+".json";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); },4000); ok=true;
+  }catch(e){}
+  toast(ok?"バックアップを書き出しました":"書き出せませんでした。コピーをお使いください");
+});
+$("bkExportCopyBtn").addEventListener("click", async function(){
+  var data = await collectBackup();
+  if(!data.folders.length){ toast("書き出すデータがありません"); return; }
+  copyText(JSON.stringify(data));
+});
+var bkFileInput = document.createElement("input");
+bkFileInput.type="file"; bkFileInput.accept="application/json,.json"; bkFileInput.style.display="none";
+document.body.appendChild(bkFileInput);
+bkFileInput.addEventListener("change", function(){
+  var f = bkFileInput.files && bkFileInput.files[0]; if(!f) return;
+  var reader=new FileReader();
+  reader.onload=function(){ parseImport(String(reader.result||"")); };
+  reader.onerror=function(){ toast("fileを読み込めませんでした"); };
+  reader.readAsText(f);
+});
+$("bkImportBtn").addEventListener("click", function(){ bkFileInput.value=""; bkFileInput.click(); });
+$("bkPasteBtn").addEventListener("click", function(){
+  var v = $("bkPasteArea").value.trim();
+  if(!v){ toast("データが空です"); return; }
+  parseImport(v);
+});
+function parseImport(text){
+  var data; try{ data=JSON.parse(text); }catch(e){ toast("データを読み取れませんでした"); return; }
+  if(!data || data.app!=="uriage-tool" || !Array.isArray(data.folders)){ toast("対応していないデータです"); return; }
+  confirmDialog({
+    title:"バックアップを読み込みますか？",
+    body:data.folders.length+"件のファイルが見つかりました。今の記録に追加します（同じファイルは新しい内容で更新されます）。",
+    ok:"読み込む",
+    onOk:async function(){ await applyImport(data,"merge"); }
+  });
+}
+async function applyImport(data, mode){
+  if(mode==="replace"){ for(var i=0;i<index.length;i++){ await sdel(KEY(index[i].id)); } index=[]; }
+  var added=0;
+  for(var j=0;j<data.folders.length;j++){
+    var f=data.folders[j]; if(!f||!f.id) continue;
+    await sset(KEY(f.id), f);
+    var row={ id:f.id, name:f.name, date:f.date, total:total(f), locked:!!f.locked, createdAt:f.createdAt||Date.now() };
+    var pos=index.findIndex(function(x){ return x.id===f.id; });
+    if(pos>=0) index[pos]=row; else { index.push(row); added++; }
+  }
+  await sset(IDX, index);
+  renderHome();
+  if(curView==="inventory") renderInventory();
+  toast(added>0?(added+"件を追加しました"):"記録を更新しました");
+}
+
+/* ============ 外部出力（sale-sync.pages.dev 連携） ============ */
+var EXT_KEY = "sales:extOn";
+var extOn = false;
+try{ extOn = JSON.parse(localStorage.getItem(EXT_KEY)||"false"); }catch(e){}
+var SS = window.SalesSync || null;
+
+function extActive(){ return !!(SS && SS.isActive && SS.isActive()); }
+/* 今の会計 = 累計 − 前回「会計完了」時点の累計（差分）。手元の累計表示は崩さない。 */
+function updateCheckoutBtn(){
+  var btn = $("checkoutBtn"); if(!btn) return;
+  // 外部出力ONで、計算中（未確定）のときだけ表示
+  btn.classList.toggle("hidden", !(extOn && sess && !sess.locked));
+}
+function currentCheckout(){
+  var base = (sess && sess.checkoutBase) || {};
+  var items = [], total = 0;
+  (sess ? (sess.items||[]) : []).forEach(function(it){
+    var d = it.qty - (base[it.id]||0);
+    if(d > 0){ items.push({ name:it.name, price:it.price, qty:d, kind:it.kind||"" }); total += it.price * d; }
+  });
+  return { items:items, total:total };
+}
+function extPayload(){
+  if(!sess) return { title:"", items:[], total:0 };
+  var c = currentCheckout();
+  return { title: sess.name + (sess.date ? "　" + sess.date : ""),
+    total: c.total, items: c.items };
+}
+function extPush(){ if(extOn && SS && extActive()){ try{ SS.update(extPayload()); }catch(e){} } }
+
+/* 会計完了：今の会計分を1件記録し、次の会計へ（外部表示は¥0に戻る）。累計・販売数は保持。 */
+$("checkoutBtn").addEventListener("click", async function(){
+  if(!sess || sess.locked) return;
+  var c = currentCheckout();
+  if(!c.total){ toast("この会計に商品がありません"); return; }
+  if(!sess.checkoutBase) sess.checkoutBase = {};
+  (sess.items||[]).forEach(function(it){ sess.checkoutBase[it.id] = it.qty; });
+  if(!sess.checkouts) sess.checkouts = [];
+  sess.checkouts.push({ amount:c.total, count:c.items.reduce(function(a,i){return a+i.qty;},0), ts:Date.now() });
+  await persist();
+  extPush(); // 差分0になり外部ディスプレイは¥0にリセット
+  toast("会計完了：¥" + c.total.toLocaleString("ja-JP"));
+});
+
+function refreshExtUI(){
+  var tg=$("extToggle"), panel=$("extPanel"), sub=$("extStateSub"), st=$("extStatus");
+  if(!tg) return;
+  tg.classList.toggle("on", extOn);
+  tg.setAttribute("aria-checked", extOn?"true":"false");
+  sub.textContent = extOn ? "ON（外部ディスプレイに反映）" : "OFF（単独動作）";
+  panel.classList.toggle("hidden", !extOn);
+  $("pinInput").value = $("pinInput").value || "";
+  if(extOn){
+    if(extActive()){ st.className="ext-status on"; st.textContent="接続中（同期しています）"; }
+    else { st.className="ext-status"; st.textContent="未接続：QR読み取りか8桁PINで接続してください"; }
+  }
+}
+$("extToggle").addEventListener("click", function(){
+  extOn = !extOn;
+  try{ localStorage.setItem(EXT_KEY, JSON.stringify(extOn)); }catch(e){}
+  refreshExtUI();
+  updateCheckoutBtn();
+  if(extOn) extPush();
+  toast(extOn ? "外部出力をONにしました" : "外部出力をOFFにしました");
+});
+
+async function connectPin(pin){
+  pin = (pin||"").replace(/\D/g,"");
+  if(pin.length !== 8){ toast("8桁のPINを入力してください"); return; }
+  if(!SS){ toast("同期モジュールを読み込めていません（通信環境をご確認ください）"); return; }
+  toast("接続中…");
+  var ok=false;
+  try{ ok = await SS.connectWithPin(pin); }catch(e){ ok=false; }
+  if(ok){
+    if(!extOn){ extOn=true; try{ localStorage.setItem(EXT_KEY, JSON.stringify(true)); }catch(e){} }
+    refreshExtUI(); extPush(); toast("接続しました");
+  } else { refreshExtUI(); toast("接続できませんでした。PINが正しいか・期限内かご確認ください"); }
+}
+$("pinConnectBtn").addEventListener("click", function(){ connectPin($("pinInput").value); });
+$("pinInput").addEventListener("keydown", function(e){ if(e.key==="Enter") connectPin($("pinInput").value); });
+
+/* QRコード読み取り（カメラ／BarcodeDetector） */
+$("qrScanBtn").addEventListener("click", startQR);
+function startQR(){
+  if(!("BarcodeDetector" in window)){
+    toast("この端末はQR自動読み取りに未対応です。PINを直接入力してください");
+    return;
+  }
+  var root=$("qrRoot");
+  root.innerHTML =
+    '<div class="qr-wrap"><div class="qr-head"><h3>QRコードを読み取り</h3>'+
+    '<button class="qr-close" id="qrClose" aria-label="閉じる">✕</button></div>'+
+    '<div class="qr-video-wrap"><video id="qrVideo" playsinline muted></video><div class="qr-frame"></div></div>'+
+    '<div class="qr-hint">外部ディスプレイに表示されたPINのQRコードを枠に合わせてください</div></div>';
+  var video=$("qrVideo"), stream=null, det=null, raf=null, stopped=false;
+  function stop(){
+    stopped=true; if(raf) cancelAnimationFrame(raf);
+    try{ if(stream) stream.getTracks().forEach(function(t){ t.stop(); }); }catch(e){}
+    root.innerHTML="";
+  }
+  $("qrClose").addEventListener("click", stop);
+  (async function(){
+    try{
+      det = new window.BarcodeDetector({ formats:["qr_code"] });
+      stream = await navigator.mediaDevices.getUserMedia({ video:{ facingMode:"environment" } });
+      video.srcObject = stream; await video.play();
+    }catch(e){ toast("カメラを起動できませんでした"); stop(); return; }
+    async function scan(){
+      if(stopped) return;
+      try{
+        var codes = await det.detect(video);
+        if(codes && codes.length){
+          var pin = String(codes[0].rawValue||"").replace(/\D/g,"").slice(0,8);
+          if(navigator.vibrate){ try{ navigator.vibrate(20); }catch(e){} }
+          stop();
+          if(pin.length===8) connectPin(pin); else toast("PINを読み取れませんでした");
+          return;
+        }
+      }catch(e){}
+      raf = requestAnimationFrame(scan);
+    }
+    scan();
+  })();
+}
+
+/* 外部出力の起動：ONで、保存済みセッションが有効ならそのまま同期継続 */
+refreshExtUI();
+if(extOn) extPush();
+
+document.body.classList.add("has-tabbar");
+showView("inventory");
+
+loadIndex();
+})();
+</script>
 </body>
 </html>
