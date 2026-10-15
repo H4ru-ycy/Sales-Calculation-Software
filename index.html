@@ -385,6 +385,53 @@ body.has-tabbar .app{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px) 
 .cl-list li{font-size:13px;line-height:1.7;color:var(--ink);margin-bottom:3px}
 
 @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+/* ---------- 待機スライドショー / 割り込み表示 ---------- */
+.sub-h{font-size:13px;font-weight:900;margin:0 0 4px}
+.u-sep{height:1px;background:var(--line);margin:18px 0}
+.ss-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 12px}
+.ss-cell{position:relative;aspect-ratio:16/10;border-radius:10px;overflow:hidden;background:var(--field);border:1.5px solid var(--line)}
+.ss-cell img{width:100%;height:100%;object-fit:cover;display:block}
+.ss-no{position:absolute;left:5px;top:5px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:900;border-radius:6px;padding:1px 6px}
+.ss-acts{position:absolute;right:4px;bottom:4px;display:flex;gap:4px}
+.ss-acts button{width:26px;height:26px;border-radius:7px;background:rgba(0,0,0,.62);color:#fff;font-size:12px;font-weight:900;line-height:26px}
+.ss-add{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;color:var(--muted);font-size:11px;font-weight:700;border-style:dashed}
+.ss-add b{font-size:22px;line-height:1}
+.range-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.range-row label{font-size:12px;font-weight:700;color:var(--muted);flex:none;min-width:5.5em}
+.range-row input[type=range]{flex:1;accent-color:var(--teal)}
+.range-row .rv{min-width:3.6em;text-align:right;font-weight:900;font-size:14px}
+.ss-status{font-size:12px;font-weight:700;color:var(--muted);margin-top:2px}
+.ss-status.ok{color:var(--teal)} .ss-status.err{color:var(--clay)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chip{padding:7px 11px;border-radius:999px;border:1.5px solid var(--line);background:var(--field);color:var(--ink);font-size:12px;font-weight:700}
+.chip:active{transform:translateY(1px)}
+.color-row{display:flex;gap:10px;margin-bottom:12px}
+.color-row .cf{flex:1}
+.color-row label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.color-row input[type=color]{width:100%;height:42px;border:1.5px solid var(--line);border-radius:10px;background:var(--field);padding:3px}
+.swatches{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.swatch{min-width:58px;height:34px;padding:0 10px;border-radius:9px;font-size:12px;font-weight:900;border:1.5px solid var(--line)}
+.al-live{border-radius:10px;padding:12px;margin-bottom:12px;display:flex;align-items:center;gap:10px;background:var(--clay-soft);color:var(--clay);font-size:13px;font-weight:700}
+.al-live .t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.al-live button{flex:none;padding:8px 12px;border-radius:9px;background:var(--clay);color:#fff;font-size:12px;font-weight:900}
+.pv-orient{display:flex;gap:6px;justify-content:center;margin-bottom:10px}
+.pv-screen{position:relative;margin:0 auto 12px;border-radius:10px;overflow:hidden;background:#201830;color:#f3ecf7;
+  container-type:size;box-shadow:0 0 0 5px #111, 0 10px 28px rgba(0,0,0,.35)}
+.pv-screen.land{width:100%;aspect-ratio:16/10}
+.pv-screen.port{width:62%;aspect-ratio:10/16}
+.pv-fake{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1cqmin}
+.pv-fake .l{font-size:4cqmin;color:#a79bb8;font-weight:700;letter-spacing:.2em}
+.pv-fake .v{font-size:18cqmin;color:#f6c56b;font-weight:700;font-family:ui-monospace,monospace}
+.pv-alert{position:absolute;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:900;
+  line-height:1.25;white-space:pre-line;word-break:break-word;overflow-wrap:anywhere}
+.pv-alert.full{inset:0;padding:6cqmin}
+.pv-alert.banner{left:0;right:0;top:0;padding:2.4cqmin 4cqmin;box-shadow:0 1.5cqmin 5cqmin rgba(0,0,0,.45)}
+.pv-warn{font-size:12px;color:var(--clay);font-weight:700;text-align:center;margin:0 0 10px}
+.alert-pill{position:fixed;left:12px;right:72px;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:55;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;max-width:420px;padding:8px 8px 8px 14px;border-radius:999px;
+  background:var(--clay);color:#fff;font-size:12px;font-weight:900;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.alert-pill .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.alert-pill button{flex:none;background:rgba(255,255,255,.22);color:#fff;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:900}
 </style>
 </head>
 <body>
@@ -395,7 +442,7 @@ body.has-tabbar .app{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px) 
     <button class="hamb" data-menu aria-label="メニューを開く"><span></span><span></span><span></span></button>
   </div>
   <div class="hero">
-    <div class="eyebrow">Ver.1.8</div>
+    <div class="eyebrow">Ver.1.9</div>
     <h2>売上計算ツール</h2>
     <p>ファイルを作って商品を登録。＋と－で数えるだけ。</p>
   </div>
@@ -530,7 +577,7 @@ body.has-tabbar .app{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px) 
   <div class="hero">
     <div class="eyebrow">ユーティリティ</div>
     <h2>ユーティリティ</h2>
-    <p>CSV出力・バックアップ・外部出力の設定。</p>
+    <p>CSV出力・バックアップ・外部出力と演出の設定。</p>
   </div>
 
   <div class="panel">
@@ -576,6 +623,61 @@ body.has-tabbar .app{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px) 
       <button class="btn btn-ghost" id="pinConnectBtn">このPINで接続</button>
     </div>
   </div>
+  <div class="panel" id="fxPanel">
+    <h3>外部ディスプレイの演出</h3>
+    <p class="u-desc">外部出力に接続中のとき、外部ディスプレイに表示されます。</p>
+
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-title">待機時スライドショー</div>
+        <div class="toggle-sub" id="ssSub">会計が¥0の間、画像を順番に表示</div>
+      </div>
+      <button type="button" class="toggle" id="ssToggle" role="switch" aria-checked="false"><span class="knob"></span></button>
+    </div>
+    <div id="ssBody" class="ext-panel hidden">
+      <div class="ss-grid" id="ssGrid"></div>
+      <input type="file" id="ssFile" accept="image/*" multiple hidden>
+      <div class="range-row">
+        <label for="ssSec">切り替え秒数</label>
+        <input type="range" id="ssSec" min="2" max="60" step="1" value="8">
+        <span class="rv" id="ssSecV">8秒</span>
+      </div>
+      <div class="field" style="margin-bottom:8px">
+        <label>画像の見せ方</label>
+        <div class="segbtns" id="ssFit">
+          <button type="button" class="seg" data-fit="contain">全体を表示</button>
+          <button type="button" class="seg" data-fit="cover">画面いっぱい</button>
+        </div>
+      </div>
+      <div class="ss-status" id="ssStatus"></div>
+    </div>
+
+    <div class="u-sep"></div>
+
+    <div class="sub-h">割り込み表示</div>
+    <p class="u-desc" style="margin-bottom:10px">離席などのお知らせを、何よりも優先して表示します。表示前にプレビューで確認できます。</p>
+    <div id="alLive"></div>
+    <div class="chips" id="alPresets"></div>
+    <textarea id="alText" class="bk-ta" style="min-height:64px;margin-bottom:12px;font-size:15px" maxlength="200" placeholder="表示する文字（改行もできます）"></textarea>
+    <div class="range-row">
+      <label for="alSize">文字の大きさ</label>
+      <input type="range" id="alSize" min="4" max="30" step="1" value="12">
+      <span class="rv" id="alSizeV">12</span>
+    </div>
+    <div class="field" style="margin-bottom:12px">
+      <label>表示のしかた</label>
+      <div class="segbtns" id="alStyle">
+        <button type="button" class="seg" data-style="full">全画面</button>
+        <button type="button" class="seg" data-style="banner">上部に帯で表示</button>
+      </div>
+    </div>
+    <div class="swatches" id="alSwatches"></div>
+    <div class="color-row">
+      <div class="cf"><label for="alColor">文字の色</label><input type="color" id="alColor" value="#ffffff"></div>
+      <div class="cf"><label for="alBg">背景の色</label><input type="color" id="alBg" value="#c0392b"></div>
+    </div>
+    <button class="btn btn-primary" id="alPreviewBtn">プレビューして表示</button>
+  </div>
 </section>
 
 <!-- ===== FOOTER (total) ===== -->
@@ -603,6 +705,7 @@ body.has-tabbar .app{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px) 
 <!-- QR scanner overlay -->
 <div id="qrRoot"></div>
 
+<div id="alertPill"></div>
 <div class="toast" id="toast"></div>
 <div id="dialogRoot"></div>
 <div id="menuRoot"></div>
@@ -614,7 +717,8 @@ window.SALESYNC_API = "https://sale-sync.pages.dev/api";
 <script>
 /* ============================================================
    sync-sender.js（インライン同梱） — 外部ディスプレイへ計算内容を送信。
-   ・SalesSync.connectWithPin(pin) / SalesSync.update({title,items,total})
+   ・SalesSync.connectWithPin(pin) / SalesSync.update({title,items,total,idle,alert})
+   ・SalesSync.pushMedia(slides, ver)：待機スライドショー画像を送信
    ・items は {name, price, qty, kind}（kind は種類:新刊/既刊、任意）
    ============================================================ */
 (function (global) {
@@ -635,13 +739,26 @@ window.SALESYNC_API = "https://sale-sync.pages.dev/api";
     const res = await fetch(CONFIG.API_BASE + path, { headers:{ "Content-Type":"application/json" }, ...opts });
     return res.json().catch(()=>({}));
   }
+  function clampNum(v, lo, hi, d){ v = Number(v); return Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; }
+  function normIdle(i){
+    if(!i) return undefined;
+    return { on:!!i.on, sec:clampNum(i.sec,2,120,8), fit: i.fit==="cover" ? "cover" : "contain",
+             ver:String(i.ver||""), count:clampNum(i.count,0,99,0) };
+  }
+  function normAlert(a){
+    if(!a || !a.on) return { on:false };
+    return { on:true, text:String(a.text||"").slice(0,200), size:clampNum(a.size,3,40,12),
+             color:String(a.color||"#ffffff").slice(0,9), bg:String(a.bg||"#c0392b").slice(0,9),
+             style: a.style==="banner" ? "banner" : "full", id:String(a.id||"") };
+  }
   function normalize(s){
     const items = (s.items||[]).map(function(it){
       return { name:String(it.name==null?"":it.name), price:Number(it.price)||0,
-               qty:Number(it.qty)||0, kind:String(it.kind==null?"":it.kind) }; // kind を保持
+               qty:Number(it.qty)||0, kind:String(it.kind==null?"":it.kind) };
     });
     const total = Number.isFinite(s.total) ? s.total : items.reduce(function(a,it){ return a+it.price*it.qty; },0);
-    return { title: s.title!=null ? String(s.title) : undefined, items:items, total:total };
+    return { title: s.title!=null ? String(s.title) : undefined, items:items, total:total,
+             idle:normIdle(s.idle), alert:normAlert(s.alert) };
   }
   function update(state){
     lastState = normalize(state);
@@ -658,6 +775,15 @@ window.SALESYNC_API = "https://sale-sync.pages.dev/api";
       if(r && r.error === "expired"){ drop(); }
     }catch(e){}
   }
+  async function pushMedia(slides, ver){
+    if(!active()) return { error:"inactive" };
+    try{
+      const r = await api("/media/push", { method:"POST", body: JSON.stringify({
+        sessionId: sess.sessionId, sellerToken: sess.sellerToken, ver: ver, slides: slides||[] }) });
+      if(r && r.error === "expired"){ drop(); }
+      return r || { error:"network" };
+    }catch(e){ return { error:"network" }; }
+  }
   async function connectWithPin(pin){
     pin = String(pin||"").replace(/\D/g,"");
     if(pin.length !== 8) return false;
@@ -669,7 +795,9 @@ window.SALESYNC_API = "https://sale-sync.pages.dev/api";
     }
     return false;
   }
-  global.SalesSync = { update:update, connectWithPin:connectWithPin, disconnect:drop, isActive:active, _config:CONFIG };
+  function sessionId(){ return active() ? sess.sessionId : null; }
+  global.SalesSync = { update:update, connectWithPin:connectWithPin, pushMedia:pushMedia, sessionId:sessionId,
+                       disconnect:drop, isActive:active, _config:CONFIG };
 })(window);
 </script>
 <script>
@@ -1107,7 +1235,7 @@ function confirmDialog(o){
 }
 
 /* ---------- menu ---------- */
-var APP_VER = "Ver.1.8";
+var APP_VER = "Ver.1.9";
 var X_ID = "H4ru_ycy";
 var MAIL = "h4ru.kyi2943@gmail.com";
 var THEME_KEY = "sales:theme";
@@ -1160,7 +1288,13 @@ function menuHome(){
 }
 function menuHistory(){
   var log = [
-    ["Ver.1.8", "最新", [
+    ["Ver.1.9", "最新", [
+      "ユーティリティに「外部ディスプレイの演出」を追加",
+      "待機時スライドショー：会計が¥0の間、外部ディスプレイに画像を順番に表示（画像・切り替え秒数・見せ方を変更可能）",
+      "割り込み表示：「サークル主 離席中」などを文字・大きさ・色・表示のしかたを指定して最優先表示。表示前にプレビューで確認",
+      "割り込み表示中は画面上部に「表示中」と終了ボタンを表示"
+    ]],
+    ["Ver.1.8", "", [
       "外部出力をレジ方式に変更：外部ディスプレイは「今の会計」だけを表示（売上総額は表示しない）",
       "計算画面に「会計完了」ボタンを追加（外部出力ON時）。押すと1会計分を記録し、外部表示は¥0にリセット",
       "手元の暫定合計・商品リスト・販売数は従来どおり累計のまま",
@@ -1250,7 +1384,7 @@ function menuHelp(){
     '<div class="note"><b>下のタブについて</b>'+
       '・<b style="display:inline">計算</b>：ファイルの作成・一覧と、頒布物を数える画面。<br>'+
       '・<b style="display:inline">在庫管理</b>：登録した全商品を横断で一覧。タイトルやイベント名で検索、新刊／既刊で絞り込みできます。<br>'+
-      '・<b style="display:inline">ユーティリティ</b>：CSV出力・バックアップ・外部出力の設定。</div>'+
+      '・<b style="display:inline">ユーティリティ</b>：CSV出力・バックアップ・外部出力と演出の設定。</div>'+
     '<div class="note" style="margin-top:10px"><b>CSV出力（ユーティリティ）</b>'+
       '・すべての記録をCSVファイルで書き出せます。Excelやスプレッドシートで開けます。<br>'+
       '・fileが使えない環境では「コピー」で貼り付け用に出力できます。</div>'+
@@ -1262,6 +1396,10 @@ function menuHelp(){
       '・使い方：トグルをON →「QRコードを読み取って接続」またはディスプレイに出た<b style="display:inline">8桁のPIN</b>を入力。<br>'+
       '・接続後は、＋／－や商品追加が自動でディスプレイに反映されます（認証は1日1回・9時間有効）。<br>'+
       '・単独で使うときはOFFのままでOKです。</div>'+
+    '<div class="note" style="margin-top:10px"><b>外部ディスプレイの演出（ユーティリティ）</b>'+
+      '・<b style="display:inline">待機時スライドショー</b>：ONにして画像を追加すると、会計が¥0の間ディスプレイに画像が順番に流れます。秒数と見せ方は自由に変更できます。画像は接続中に自動で送信されます。<br>'+
+      '・<b style="display:inline">割り込み表示</b>：文字・大きさ・色を決めて「プレビューして表示」→ 確認してOKで表示。スライドや合計より優先して出ます。<br>'+
+      '・割り込み表示中は画面の上に「表示中」が出るので、戻ったら「表示を終了」を押してください。</div>'+
     '<div class="note" style="margin-top:10px"><b>在庫について</b>'+
       '・カードに「残り〇」と表示されます。残り3以下で黄色、0で赤色になります。<br>'+
       '・在庫が0になると「＋」は押せなくなります。<br>'+
@@ -1620,7 +1758,13 @@ function extPayload(){
   return { title: sess.name + (sess.date ? "　" + sess.date : ""),
     total: c.total, items: c.items };
 }
-function extPush(){ if(extOn && SS && extActive()){ try{ SS.update(extPayload()); }catch(e){} } }
+function extPush(){
+  if(extOn && SS && extActive()){
+    try{ var p = extPayload(); p.idle = idlePayload(); p.alert = alertPayload(); SS.update(p); }catch(e){}
+    if(idleCfg && ssNeedsUpload()) ssScheduleUpload();
+  }
+  if(idleCfg) ssRenderStatus();
+}
 
 /* 会計完了：今の会計分を1件記録し、次の会計へ（外部表示は¥0に戻る）。累計・販売数は保持。 */
 $("checkoutBtn").addEventListener("click", async function(){
@@ -1716,6 +1860,254 @@ function startQR(){
     scan();
   })();
 }
+
+/* ============ 外部ディスプレイの演出（Ver.1.9） ============
+   ・待機時スライドショー：画像は端末内(IndexedDB)に保存し、変更時だけ外部へ送信
+   ・割り込み表示：プレビューで確認 → OKで外部ディスプレイに最優先表示 */
+var IDLE_KEY = "sales:idle", ALERT_KEY = "sales:alertCfg", ALERT_ON_KEY = "sales:alertOn";
+function lsGet(k, d){ try{ var v = JSON.parse(localStorage.getItem(k)||"null"); return v==null ? d : v; }catch(e){ return d; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+
+var idleCfg = lsGet(IDLE_KEY, { on:false, sec:8, fit:"contain", ver:"", sentSession:"", sentHash:"", failHash:"" });
+var alertCfg = lsGet(ALERT_KEY, { text:"", size:12, color:"#ffffff", bg:"#c0392b", style:"full" });
+var alertShown = lsGet(ALERT_ON_KEY, null);
+var slides = [];             // [{id, src(dataURL)}]
+var MAX_SLIDES = 15;
+var ssUploading = false, ssDirty = false, ssUpTimer = null, ssErr = "";
+function saveIdle(){ lsSet(IDLE_KEY, idleCfg); }
+
+function idlePayload(){ return { on:!!idleCfg.on, sec:idleCfg.sec, fit:idleCfg.fit, ver:idleCfg.ver||"", count:slides.length }; }
+function alertPayload(){ return alertShown ? Object.assign({ on:true }, alertShown) : { on:false }; }
+
+/* ---------- IndexedDB（画像の保存先。使えなければメモリ） ---------- */
+var _db = null;
+function idb(){
+  if(_db) return Promise.resolve(_db);
+  return new Promise(function(res, rej){
+    if(!window.indexedDB) return rej(new Error("no idb"));
+    var r = indexedDB.open("sales-fx", 1);
+    r.onupgradeneeded = function(){ r.result.createObjectStore("kv"); };
+    r.onsuccess = function(){ _db = r.result; res(_db); };
+    r.onerror = function(){ rej(r.error); };
+  });
+}
+async function idbGet(k){
+  try{ var db = await idb(); return await new Promise(function(res){
+    var q = db.transaction("kv").objectStore("kv").get(k);
+    q.onsuccess = function(){ res(q.result); }; q.onerror = function(){ res(null); }; }); }
+  catch(e){ return null; }
+}
+async function idbSet(k, v){
+  try{ var db = await idb(); await new Promise(function(res, rej){
+    var t = db.transaction("kv","readwrite"); t.objectStore("kv").put(v, k);
+    t.oncomplete = res; t.onerror = function(){ rej(t.error); }; }); return true; }
+  catch(e){ return false; }
+}
+async function saveSlides(){
+  var ok = await idbSet("slides", slides);
+  if(!ok) toast("画像を端末に保存できませんでした（このページを閉じると消えます）");
+}
+
+/* ---------- 画像の縮小（長辺1600px・JPEG） ---------- */
+function compressImage(file){
+  return new Promise(function(res, rej){
+    var url = URL.createObjectURL(file), img = new Image();
+    img.onload = function(){
+      var M = 1600, w = img.naturalWidth, h = img.naturalHeight, r = Math.min(1, M / Math.max(w, h));
+      var c = document.createElement("canvas"); c.width = Math.max(1, Math.round(w*r)); c.height = Math.max(1, Math.round(h*r));
+      var x = c.getContext("2d"); x.fillStyle = "#000"; x.fillRect(0,0,c.width,c.height); x.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url); res(c.toDataURL("image/jpeg", 0.82));
+    };
+    img.onerror = function(){ URL.revokeObjectURL(url); rej(new Error("decode")); };
+    img.src = url;
+  });
+}
+
+/* ---------- スライドショー UI ---------- */
+function ssHash(){ return slides.map(function(s){ return s.id; }).join(",") || "empty"; }
+function renderSlides(){
+  var g = $("ssGrid"), h = "";
+  slides.forEach(function(s, i){
+    h += '<div class="ss-cell"><img src="'+s.src+'" alt=""><span class="ss-no">'+(i+1)+'</span>'+
+      '<div class="ss-acts">'+
+      (i>0 ? '<button type="button" data-ss="left" data-i="'+i+'" aria-label="前へ">◀</button>' : '')+
+      '<button type="button" data-ss="del" data-i="'+i+'" aria-label="削除">✕</button></div></div>';
+  });
+  if(slides.length < MAX_SLIDES) h += '<button type="button" class="ss-cell ss-add" id="ssAdd"><b>＋</b>画像を追加</button>';
+  g.innerHTML = h;
+  var add = $("ssAdd"); if(add) add.addEventListener("click", function(){ $("ssFile").click(); });
+}
+function renderIdleUI(){
+  var tg = $("ssToggle");
+  tg.classList.toggle("on", !!idleCfg.on); tg.setAttribute("aria-checked", idleCfg.on ? "true" : "false");
+  $("ssBody").classList.toggle("hidden", !idleCfg.on);
+  $("ssSec").value = idleCfg.sec; $("ssSecV").textContent = idleCfg.sec + "秒";
+  Array.prototype.forEach.call($("ssFit").children, function(b){ b.classList.toggle("on", b.getAttribute("data-fit") === idleCfg.fit); });
+  renderSlides(); ssRenderStatus();
+}
+function ssRenderStatus(){
+  var st = $("ssStatus"); if(!st) return;
+  st.className = "ss-status";
+  if(!slides.length){ st.textContent = "画像を追加してください（最大"+MAX_SLIDES+"枚）"; return; }
+  if(!extOn || !extActive()){ st.textContent = slides.length + "枚・外部出力に接続すると自動で送信されます"; return; }
+  if(ssUploading){ st.textContent = "外部ディスプレイへ送信中…"; return; }
+  if(ssErr){ st.className = "ss-status err"; st.innerHTML = esc(ssErr) + ' <button type="button" class="chip" id="ssRetry" style="margin-left:6px">再送信</button>';
+    $("ssRetry").addEventListener("click", function(){ idleCfg.failHash = ""; ssErr = ""; ssUpload(); }); return; }
+  if(!ssNeedsUpload()){ st.className = "ss-status ok"; st.textContent = "✓ " + slides.length + "枚を外部ディスプレイに送信済み"; return; }
+  st.textContent = "送信待ち…";
+}
+function ssNeedsUpload(){
+  if(!idleCfg.on || !SS || !extActive()) return false;
+  return idleCfg.sentSession !== SS.sessionId() || idleCfg.sentHash !== ssHash();
+}
+function ssScheduleUpload(){
+  if(idleCfg.failHash && idleCfg.failHash === ssHash() + "@" + (SS && SS.sessionId())) return; // 同じ内容の失敗は自動再送しない
+  clearTimeout(ssUpTimer); ssUpTimer = setTimeout(ssUpload, 800);
+}
+async function ssUpload(){
+  if(!idleCfg.on || !extOn || !extActive()){ ssRenderStatus(); return; }
+  if(ssUploading){ ssDirty = true; return; }
+  ssUploading = true; ssErr = ""; ssRenderStatus();
+  var hash = ssHash(), sid = SS.sessionId(), ver = Date.now().toString(36);
+  var r = await SS.pushMedia(slides.map(function(s){ return s.src; }), ver);
+  ssUploading = false;
+  if(r && r.ok){
+    idleCfg.ver = ver; idleCfg.sentSession = sid; idleCfg.sentHash = hash; idleCfg.failHash = ""; saveIdle();
+    extPush();
+  }else{
+    ssErr = (r && r.message) || "画像を送信できませんでした";
+    idleCfg.failHash = hash + "@" + sid; saveIdle();
+  }
+  ssRenderStatus();
+  if(ssDirty){ ssDirty = false; if(ssNeedsUpload()) ssUpload(); }
+}
+function idleChanged(){ saveIdle(); renderIdleUI(); extPush(); }
+
+$("ssToggle").addEventListener("click", function(){
+  idleCfg.on = !idleCfg.on; idleChanged();
+  toast(idleCfg.on ? "待機時スライドショーをONにしました" : "待機時スライドショーをOFFにしました");
+});
+$("ssSec").addEventListener("input", function(){ $("ssSecV").textContent = this.value + "秒"; });
+$("ssSec").addEventListener("change", function(){ idleCfg.sec = Number(this.value)||8; idleChanged(); });
+$("ssFit").addEventListener("click", function(e){
+  var b = e.target.closest("[data-fit]"); if(!b) return;
+  idleCfg.fit = b.getAttribute("data-fit"); idleChanged();
+});
+$("ssFile").addEventListener("change", async function(){
+  var files = Array.prototype.slice.call(this.files || []); this.value = "";
+  if(!files.length) return;
+  var room = MAX_SLIDES - slides.length;
+  if(files.length > room){ toast("画像は"+MAX_SLIDES+"枚までです（"+room+"枚追加します）"); files = files.slice(0, room); }
+  toast("画像を読み込み中…");
+  var added = 0;
+  for(var i=0;i<files.length;i++){
+    try{ slides.push({ id: uid(), src: await compressImage(files[i]) }); added++; }catch(e){}
+  }
+  await saveSlides(); renderIdleUI(); extPush();
+  toast(added ? added + "枚追加しました" : "画像を読み込めませんでした");
+});
+$("ssGrid").addEventListener("click", function(e){
+  var b = e.target.closest("[data-ss]"); if(!b) return;
+  var i = Number(b.getAttribute("data-i")), act = b.getAttribute("data-ss");
+  if(act === "left" && i > 0){ var t = slides[i-1]; slides[i-1] = slides[i]; slides[i] = t; saveSlides(); renderIdleUI(); extPush(); }
+  if(act === "del"){
+    confirmDialog({ title:"画像を削除しますか？", body:(i+1)+"枚目の画像をスライドショーから外します。", ok:"削除する", danger:true,
+      onOk:function(){ slides.splice(i,1); saveSlides(); renderIdleUI(); extPush(); toast("削除しました"); } });
+  }
+});
+
+/* ---------- 割り込み表示 ---------- */
+var AL_PRESETS = ["サークル主 離席中", "売り子 離席中", "ただいま休憩中です", "少々お待ちください", "まもなく戻ります", "完売しました"];
+var AL_SWATCHES = [["#ffffff","#c0392b"],["#1a1a1a","#f6c344"],["#ffffff","#1f3a68"],["#111111","#ffffff"],["#ffffff","#111111"],["#ffffff","#0f6d63"]];
+function saveAlertCfg(){ lsSet(ALERT_KEY, alertCfg); }
+function renderAlertUI(){
+  $("alPresets").innerHTML = AL_PRESETS.map(function(t){ return '<button type="button" class="chip" data-t="'+escAttr(t)+'">'+esc(t)+'</button>'; }).join("");
+  $("alSwatches").innerHTML = AL_SWATCHES.map(function(c){
+    return '<button type="button" class="swatch" data-c="'+c[0]+'" data-b="'+c[1]+'" style="color:'+c[0]+';background:'+c[1]+'">あ</button>'; }).join("");
+  $("alText").value = alertCfg.text || "";
+  $("alSize").value = alertCfg.size; $("alSizeV").textContent = alertCfg.size;
+  $("alColor").value = alertCfg.color; $("alBg").value = alertCfg.bg;
+  Array.prototype.forEach.call($("alStyle").children, function(b){ b.classList.toggle("on", b.getAttribute("data-style") === alertCfg.style); });
+  renderAlertLive();
+}
+function renderAlertLive(){
+  var html = "";
+  if(alertShown){
+    html = '<span class="t">📢 表示中：' + esc(String(alertShown.text).replace(/\n/g," ")) + '</span><button type="button" data-al-off>表示を終了</button>';
+  }
+  $("alLive").innerHTML = html ? '<div class="al-live">'+html+'</div>' : "";
+  $("alertPill").innerHTML = html ? '<div class="alert-pill">'+html+'</div>' : "";
+  $("alPreviewBtn").textContent = alertShown ? "内容を変えてプレビュー" : "プレビューして表示";
+}
+function endAlert(){
+  alertShown = null; lsSet(ALERT_ON_KEY, null); renderAlertLive(); extPush();
+  toast("割り込み表示を終了しました");
+}
+document.addEventListener("click", function(e){ if(e.target.closest("[data-al-off]")) endAlert(); });
+$("alPresets").addEventListener("click", function(e){
+  var b = e.target.closest("[data-t]"); if(!b) return;
+  alertCfg.text = b.getAttribute("data-t"); $("alText").value = alertCfg.text; saveAlertCfg();
+});
+$("alSwatches").addEventListener("click", function(e){
+  var b = e.target.closest("[data-c]"); if(!b) return;
+  alertCfg.color = b.getAttribute("data-c"); alertCfg.bg = b.getAttribute("data-b");
+  $("alColor").value = alertCfg.color; $("alBg").value = alertCfg.bg; saveAlertCfg();
+});
+$("alText").addEventListener("input", function(){ alertCfg.text = this.value; saveAlertCfg(); });
+$("alSize").addEventListener("input", function(){ alertCfg.size = Number(this.value)||12; $("alSizeV").textContent = alertCfg.size; saveAlertCfg(); });
+$("alColor").addEventListener("input", function(){ alertCfg.color = this.value; saveAlertCfg(); });
+$("alBg").addEventListener("input", function(){ alertCfg.bg = this.value; saveAlertCfg(); });
+$("alStyle").addEventListener("click", function(e){
+  var b = e.target.closest("[data-style]"); if(!b) return;
+  alertCfg.style = b.getAttribute("data-style"); saveAlertCfg(); renderAlertUI();
+});
+
+$("alPreviewBtn").addEventListener("click", function(){
+  var text = String(alertCfg.text||"").trim();
+  if(!text){ toast("表示する文字を入力してください"); $("alText").focus(); return; }
+  var snap = { text:text, size:alertCfg.size, color:alertCfg.color, bg:alertCfg.bg, style:alertCfg.style };
+  var connected = extOn && extActive();
+  var root = $("dialogRoot"), orient = "land";
+  function screenHTML(){
+    return '<div class="pv-screen '+orient+'">'+
+      '<div class="pv-fake"><div class="l">合計</div><div class="v">¥0</div></div>'+
+      '<div class="pv-alert '+(snap.style==="banner"?"banner":"full")+'" style="background:'+escAttr(snap.bg)+';color:'+escAttr(snap.color)+';font-size:'+snap.size+'cqmin">'+esc(snap.text)+'</div></div>';
+  }
+  root.innerHTML =
+    '<div class="scrim"><div class="dialog" role="dialog" aria-modal="true">'+
+      '<h4>プレビュー</h4>'+
+      '<p style="margin-bottom:12px">外部ディスプレイにはこのように表示されます。</p>'+
+      '<div class="pv-orient segbtns"><button type="button" class="seg on" data-o="land">横向き</button><button type="button" class="seg" data-o="port">縦向き</button></div>'+
+      '<div id="pvBox">'+screenHTML()+'</div>'+
+      (connected ? '' : '<div class="pv-warn">外部出力に接続していないため表示できません。<br>先に「外部出力」で接続してください。</div>')+
+      '<div class="acts">'+
+        '<button class="btn btn-primary" id="pvOk"'+(connected?'':' disabled')+'>OK・この内容で表示する</button>'+
+        '<button class="btn btn-ghost" id="pvNo">戻って修正する</button>'+
+      '</div></div></div>';
+  var close = function(){ root.innerHTML = ""; };
+  root.querySelector(".pv-orient").addEventListener("click", function(e){
+    var b = e.target.closest("[data-o]"); if(!b) return;
+    orient = b.getAttribute("data-o");
+    Array.prototype.forEach.call(this.children, function(x){ x.classList.toggle("on", x === b); });
+    $("pvBox").innerHTML = screenHTML();
+  });
+  $("pvNo").addEventListener("click", close);
+  root.querySelector(".scrim").addEventListener("click", function(e){ if(e.target === this) close(); });
+  $("pvOk").addEventListener("click", function(){
+    snap.id = uid();
+    alertShown = snap; lsSet(ALERT_ON_KEY, alertShown);
+    close(); renderAlertLive(); extPush();
+    toast("外部ディスプレイに表示しました");
+  });
+});
+
+/* 起動時：保存済み画像を読み込み */
+renderIdleUI(); renderAlertUI();
+idbGet("slides").then(function(v){
+  if(Array.isArray(v)) slides = v;
+  renderIdleUI();
+  if(extOn) extPush();
+});
 
 /* 外部出力の起動：ONで、保存済みセッションが有効ならそのまま同期継続 */
 refreshExtUI();
