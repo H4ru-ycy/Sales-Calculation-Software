@@ -36,7 +36,7 @@
   --clay:#A8433A;
   --shadow:0 1px 0 rgba(18,33,30,.06), 0 6px 18px rgba(18,33,30,.07);
   --pad:16px;
-  --footer-h:104px;
+  --footer-h:122px;
 }
 html[data-theme="dark"]{
   --ink:#ECF1EF; --paper:#0F1412; --card:#18211E; --line:#2C3835; --muted:#93A19D;
@@ -195,12 +195,17 @@ input{font-family:inherit;font-size:16px}
 }
 .footer-in{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:14px}
 .tot{flex:1;min-width:0}
-.tot .lbl{font-size:10px;letter-spacing:.22em;font-weight:700;color:var(--bar-sub)}
-.tot .val{font-size:34px;font-weight:700;line-height:1.1;white-space:nowrap}
-.tot .val small{font-size:15px;font-weight:500;margin-right:2px;color:var(--bar-sub)}
+.tot .lbl{font-size:10px;letter-spacing:.16em;font-weight:700;color:var(--bar-sub)}
+.tot-line{display:flex;align-items:baseline;gap:8px;min-width:0}
+.tot-line .lbl{flex:none;width:4.2em}
+.tot-line.big{margin-top:1px}
+.tot-line.big .lbl.cur{color:var(--amber)}
+.tot .val{font-size:30px;font-weight:700;line-height:1.1;white-space:nowrap}
+.tot .val-sm{font-size:16px;font-weight:700;line-height:1.1;white-space:nowrap;color:var(--bar-sub)}
+.tot .val small,.tot .val-sm small{font-size:14px;font-weight:500;margin-right:1px;color:var(--bar-sub)}
 .tot .val.bump{animation:bump .22s ease-out}
 @keyframes bump{0%{transform:translateY(-4px);opacity:.55}100%{transform:none;opacity:1}}
-.tot .sub{font-size:11px;color:var(--bar-sub);margin-top:2px}
+.tot .sub{font-size:11px;color:var(--bar-sub);margin-top:3px}
 .finish{background:var(--amber);color:#2A1F00;padding:14px 18px;border-radius:11px;
   font-size:14px;font-weight:900;letter-spacing:.04em;white-space:nowrap}
 .finish:active{transform:translateY(1px)}
@@ -414,7 +419,7 @@ body.has-tabbar .app{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px) 
     <button class="hamb" data-menu aria-label="メニューを開く"><span></span><span></span><span></span></button>
   </div>
   <div class="hero">
-    <div class="eyebrow">Ver.2.1</div>
+    <div class="eyebrow">Ver.2.2</div>
     <h2>売上計算ツール</h2>
     <p>ファイルを作って商品を登録。＋と－で数えるだけ。</p>
   </div>
@@ -603,12 +608,18 @@ body.has-tabbar .app{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px) 
 <div class="footer hidden" id="footer">
   <div class="footer-in">
     <div class="tot">
-      <div class="lbl" id="totLabel">暫定合計</div>
-      <div class="val num" id="totVal"><small>¥</small>0</div>
-      <div class="sub" id="totSub">0点</div>
+      <div class="tot-line">
+        <span class="lbl" id="totLabel">売上</span>
+        <span class="val-sm num" id="salesVal"><small>¥</small>0</span>
+      </div>
+      <div class="tot-line big">
+        <span class="lbl cur" id="curLabel">今の会計</span>
+        <span class="val num" id="curVal"><small>¥</small>0</span>
+      </div>
+      <div class="sub" id="curSub">0点</div>
     </div>
     <div class="footer-btns">
-      <button class="checkout hidden" id="checkoutBtn">会計完了</button>
+      <button class="checkout" id="checkoutBtn">会計完了</button>
       <button class="finish" id="finishBtn">終了する</button>
     </div>
   </div>
@@ -821,7 +832,8 @@ function openEditor(s){
   $("footer").classList.toggle("locked", !!s.locked);
   $("finishBtn").disabled = !!s.locked;
   $("finishBtn").textContent = s.locked ? "記録済み" : "終了する";
-  $("totLabel").textContent = s.locked ? "確定合計" : "暫定合計";
+  $("totLabel").textContent = s.locked ? "会計数" : "売上";
+  $("curLabel").textContent = s.locked ? "売上合計" : "今の会計";
   if(!s.checkoutBase) s.checkoutBase = {};
   updateCheckoutBtn();
   setItemKind("");
@@ -881,18 +893,21 @@ function renderItems(){
       hasStock = false; left = null; out = false;
       stockTxt = '<span class="stock none">在庫管理なし</span>';
     }
+    // 商品カードの個数・金額は「今の会計（1会計分）」を表示。確定後はリセットされる
+    var base = (sess.checkoutBase && sess.checkoutBase[it.id]) || 0;
+    var curQty = sess.locked ? it.qty : (it.qty - base);
     return '<div class="item'+(sel?" sel":"")+'" data-id="'+it.id+'">'+
       '<button class="item-head" data-sel="'+it.id+'">'+
         '<div class="item-name"><div class="n">'+esc(it.name)+'</div>'+
           '<div class="p num">'+yen(it.price)+' / 点　'+stockTxt+'</div></div>'+
-        '<div class="item-qty">×<b class="num">'+it.qty+'</b></div>'+
-        '<div class="item-sub num">'+yen(it.price*it.qty)+'</div>'+
+        '<div class="item-qty">×<b class="num">'+curQty+'</b></div>'+
+        '<div class="item-sub num">'+yen(it.price*curQty)+'</div>'+
       '</button>'+
       '<div class="pad">'+
-        '<div class="padtag">計算中'+(hasStock?'　／　在庫 残り '+left+' 点':'')+'</div>'+
+        '<div class="padtag">今の会計'+(hasStock?'　／　在庫 残り '+left+' 点':'')+'</div>'+
         '<div class="padrow">'+
-          '<button class="step minus" data-minus="'+it.id+'"'+(it.qty<=0?" disabled":"")+'>−</button>'+
-          '<div class="padcount num">'+it.qty+'</div>'+
+          '<button class="step minus" data-minus="'+it.id+'"'+(curQty<=0?" disabled":"")+'>−</button>'+
+          '<div class="padcount num">'+curQty+'</div>'+
           '<button class="step plus" data-plus="'+it.id+'"'+(out?" disabled":"")+'>＋</button>'+
         '</div>'+
         (out?'<div class="soldout">在庫がなくなりました</div>':'')+
@@ -902,14 +917,27 @@ function renderItems(){
   }).join("");
 }
 function renderTotal(){
-  var t = total(sess);
-  var v = $("totVal");
-  v.innerHTML = '<small>¥</small>' + t.toLocaleString("ja-JP");
-  if(t !== lastTotal && lastTotal !== -1){
+  if(sess.locked){
+    // 記録済み：会計数と売上合計を表示
+    var salesAll = total(sess), nc = (sess.checkouts||[]).length;
+    $("salesVal").innerHTML = nc + '<small style="margin-left:3px">会計</small>';
+    $("curVal").innerHTML = '<small>¥</small>' + salesAll.toLocaleString("ja-JP");
+    $("curSub").textContent = count(sess) + "点 / " + sess.items.length + "商品";
+    lastTotal = salesAll;
+    return;
+  }
+  // 売上＝確定した会計の合計、今の会計＝計算中の1会計分
+  var sales = (sess.checkouts||[]).reduce(function(a,c){ return a+(c.amount||0); }, 0);
+  var cur = currentCheckout();
+  var curCount = cur.items.reduce(function(a,i){ return a+i.qty; }, 0);
+  $("salesVal").innerHTML = '<small>¥</small>' + sales.toLocaleString("ja-JP");
+  var v = $("curVal");
+  v.innerHTML = '<small>¥</small>' + cur.total.toLocaleString("ja-JP");
+  if(cur.total !== lastTotal && lastTotal !== -1){
     v.classList.remove("bump"); void v.offsetWidth; v.classList.add("bump");
   }
-  lastTotal = t;
-  $("totSub").textContent = count(sess) + "点 / " + sess.items.length + "商品";
+  lastTotal = cur.total;
+  $("curSub").textContent = curCount + "点 / " + cur.items.length + "商品";
 }
 async function persist(){
   if(!sess) return;
@@ -1131,8 +1159,9 @@ $("itemList").addEventListener("click", async function(e){
         toast("在庫がありません"); return;
       }
       it.qty += 1;
-    } else { // minus
-      if(it.qty <= 0) return;
+    } else { // minus：今の会計分の中だけ戻せる（確定済みの会計は減らさない）
+      var base = (sess.checkoutBase && sess.checkoutBase[it.id]) || 0;
+      if(it.qty - base <= 0) return;
       if(linked && typeof linked.stock === "number"){ linked.stock += 1; saveInv(); } // 在庫を戻す
       it.qty -= 1;
     }
@@ -1172,25 +1201,26 @@ $("itemList").addEventListener("click", async function(e){
 /* ---------- finish ---------- */
 $("finishBtn").addEventListener("click", function(){
   if(sess.locked) return;
-  // 未確定の会計分があれば最後の1会計として記録
-  var open = currentCheckout();
-  if(open.total > 0){
-    if(!sess.checkoutBase) sess.checkoutBase = {};
-    (sess.items||[]).forEach(function(it){ sess.checkoutBase[it.id] = it.qty; });
-    if(!sess.checkouts) sess.checkouts = [];
-    sess.checkouts.push({ amount:open.total, count:open.items.reduce(function(a,i){return a+i.qty;},0), ts:Date.now() });
-  }
+  var open = currentCheckout();            // 未確定の会計（確定はOK時のみ）
   var t = total(sess), c = count(sess);
-  var nCheckouts = (sess.checkouts||[]).length;
+  var nCheckouts = (sess.checkouts||[]).length + (open.total > 0 ? 1 : 0);
   confirmDialog({
     title: "この内容で終了しますか？",
-    body: "終了すると保存され、あとから編集できません。",
+    body: (open.total>0 ? "計算中の会計（¥"+open.total.toLocaleString("ja-JP")+"）も記録します。" : "")
+          + "終了すると保存され、あとから編集できません。",
     recap: '<div><span>'+esc(sess.name)+'</span><span class="num">'+esc(sess.date||"—")+'</span></div>'+
            (nCheckouts ? '<div><span>会計数</span><span class="num">'+nCheckouts+'回</span></div>' : '')+
            '<div><span>点数</span><span class="num">'+c+'点</span></div>'+
            '<div class="big"><span>売上合計</span><span class="num">'+yen(t)+'</span></div>',
     ok: "終了して保存する",
     onOk: async function(){
+      // 計算中の会計があれば最後の1会計として確定
+      if(open.total > 0){
+        if(!sess.checkoutBase) sess.checkoutBase = {};
+        (sess.items||[]).forEach(function(it){ sess.checkoutBase[it.id] = it.qty; });
+        if(!sess.checkouts) sess.checkouts = [];
+        sess.checkouts.push({ amount:open.total, count:open.items.reduce(function(a,i){return a+i.qty;},0), ts:Date.now() });
+      }
       sess.locked = true; sess.closedAt = Date.now(); selId = null;
       await persist();
       openEditor(sess);
@@ -1222,7 +1252,7 @@ function confirmDialog(o){
 }
 
 /* ---------- menu ---------- */
-var APP_VER = "Ver.2.1";
+var APP_VER = "Ver.2.2";
 var X_ID = "H4ru_ycy";
 var MAIL = "h4ru.kyi2943@gmail.com";
 var THEME_KEY = "sales:theme";
@@ -1275,7 +1305,12 @@ function menuHome(){
 }
 function menuHistory(){
   var log = [
-    ["Ver.2.1", "最新", [
+    ["Ver.2.2", "最新", [
+      "計算画面をレジ方式に刷新：下部の左に「売上（確定した会計の合計）」、右に「今の会計」を表示",
+      "商品カードの個数・金額は1会計ごとの表示に（会計完了で×0にリセット）",
+      "「会計完了」を常時表示。押すと今の会計が売上に加算され、次の会計へ。外部ディスプレイは従来どおり"
+    ]],
+    ["Ver.2.1", "", [
       "計算で売れた分だけ、在庫管理タブの在庫も実際に減るように同期（＋で実在庫−1、−で戻る）",
       "取り込んだ商品を削除すると、数えた分の在庫を在庫管理に戻す"
     ]],
@@ -1729,8 +1764,8 @@ function extActive(){ return !!(SS && SS.isActive && SS.isActive()); }
 /* 今の会計 = 累計 − 前回「会計完了」時点の累計（差分）。手元の累計表示は崩さない。 */
 function updateCheckoutBtn(){
   var btn = $("checkoutBtn"); if(!btn) return;
-  // 外部出力ONで、計算中（未確定）のときだけ表示
-  btn.classList.toggle("hidden", !(extOn && sess && !sess.locked));
+  // 計算中（未確定）のファイルを開いている間は常に表示（外部出力ON/OFFに関わらずレジ方式）
+  btn.classList.toggle("hidden", !(sess && !sess.locked));
 }
 function currentCheckout(){
   var base = (sess && sess.checkoutBase) || {};
@@ -1759,8 +1794,9 @@ $("checkoutBtn").addEventListener("click", async function(){
   if(!sess.checkouts) sess.checkouts = [];
   sess.checkouts.push({ amount:c.total, count:c.items.reduce(function(a,i){return a+i.qty;},0), ts:Date.now() });
   await persist();
+  renderItems(); renderTotal();   // 今の会計→0、売上に加算、カードは×0に戻る
   extPush(); // 差分0になり外部ディスプレイは¥0にリセット
-  toast("会計完了：¥" + c.total.toLocaleString("ja-JP"));
+  toast("会計完了：¥" + c.total.toLocaleString("ja-JP") + "（売上に加算）");
 });
 
 function refreshExtUI(){
