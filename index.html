@@ -247,6 +247,10 @@ input{font-family:inherit;font-size:16px}
 .tab.on{color:var(--teal)}
 .tab.on .tl{font-weight:900}
 body.has-tabbar .app{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px) + 20px)}
+/* 計算中（ファイルを開いている間）もタブバーを表示：合計バーはタブバーの上に重ねる */
+body.in-editor .footer{bottom:var(--tab-h,54px);padding-bottom:12px}
+body.in-editor #editor{padding-bottom:calc(var(--footer-h) + var(--tab-h,54px) + 24px)}
+body.in-editor .toast{bottom:calc(var(--footer-h) + var(--tab-h,54px) + 16px)}
 
 /* ---------- segmented ---------- */
 .segbtns{display:flex;gap:6px;flex-wrap:wrap}
@@ -934,7 +938,13 @@ function openEditor(s){
   $("home").classList.add("hidden");
   $("inventory").classList.add("hidden");
   $("utility").classList.add("hidden");
-  $("tabbar").classList.add("hidden");
+  $("tabbar").classList.remove("hidden");
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(t){
+    t.classList.toggle("on", t.dataset.view === "home");
+  });
+  document.body.classList.add("in-editor");
+  curView = "editor";
+  measureTabbar();
   $("editor").classList.remove("hidden");
   $("footer").classList.remove("hidden");
   $("sessTitle").textContent = s.name;
@@ -954,7 +964,7 @@ function openEditor(s){
   window.scrollTo(0,0);
 }
 function backHome(){
-  sess = null; selId = null;
+  sess = null; selId = null; curView = "home";
   sdel(LAST);
   $("editor").classList.add("hidden");
   $("footer").classList.add("hidden");
@@ -963,7 +973,17 @@ function backHome(){
 }
 /* ---------- タブ / ビュー切替 ---------- */
 var curView = "home";
+function measureTabbar(){
+  requestAnimationFrame(function(){
+    var h = $("tabbar").offsetHeight;
+    if(h) document.documentElement.style.setProperty("--tab-h", h + "px");
+  });
+}
+window.addEventListener("resize", measureTabbar);
 function showView(name){
+  // ファイルを開いたまま他のタブへ移って「計算」に戻ったら、そのファイルの計算画面へ
+  if(name === "home" && sess){ if(curView !== "editor") openEditor(sess); return; }
+  document.body.classList.remove("in-editor");
   curView = name;
   $("editor").classList.add("hidden");
   $("footer").classList.add("hidden");
@@ -1419,7 +1439,8 @@ function menuHistory(){
   var log = [
     ["Ver.2.4", "最新", [
       "待機スライドショーの画像を売上計算ツールから追加・削除・並べ替えできるように（最大20枚、外部ディスプレイへ自動送信）",
-      "毎日つなぎ直しても、登録済みの画像は接続時に自動で送り直す"
+      "毎日つなぎ直しても、登録済みの画像は接続時に自動で送り直す",
+      "ファイルを開いて計算している間も下部タブを表示。計算の途中でユーティリティ（お知らせ表示など）へ移って、「計算」タブでそのまま戻れるように"
     ]],
     ["Ver.2.3", "", [
       "ユーティリティに「待機スライドショー」を追加：外部ディスプレイの待機中スライドショーのON/OFFと1枚あたりの秒数（2〜120秒）をこの端末から変更",
@@ -2166,22 +2187,4 @@ function sidb(){
   return new Promise(function(res, rej){
     var r = indexedDB.open("sales-slides", 1);
     r.onupgradeneeded = function(){ r.result.createObjectStore("kv"); };
-    r.onsuccess = function(){ res(r.result); }; r.onerror = function(){ rej(r.error); };
-  });
-}
-function sidbGet(k){ return sidb().then(function(db){ return new Promise(function(res,rej){
-  var q = db.transaction("kv","readonly").objectStore("kv").get(k); q.onsuccess=function(){ res(q.result||null); }; q.onerror=function(){ rej(q.error); }; }); }); }
-function sidbSet(k,v){ return sidb().then(function(db){ return new Promise(function(res,rej){
-  var t = db.transaction("kv","readwrite"); t.objectStore("kv").put(v,k); t.oncomplete=function(){ res(); }; t.onerror=function(){ rej(t.error); }; }); }); }
-
-function slideSentOk(){
-  var sid = SS && SS.sessionId ? SS.sessionId() : null;
-  return !!(sid && slideSent && slideSent.sid === sid && slideSent.ver === slideVer);
-}
-function slidePayload(){
-  var ok = slideSentOk();
-  return { on: !!extDisp.slideOn, sec: extDisp.slideSec, ver: ok ? slideVer : "", count: ok ? slideImgs.length : 0 };
-}
-async function saveSlides(){
-  slideVer = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
-  try{ await sidbSet("sl
+    r.onsuccess = function(){ res(r.result); }; r.onerror
