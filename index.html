@@ -313,6 +313,35 @@ body.has-tabbar .app{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px) 
 .ext-status.on{background:var(--banner-bg);color:var(--teal)}
 .ext-status.err{background:var(--clay-soft);color:var(--clay)}
 
+/* ---------- 外部ディスプレイ：スライドショー／お知らせ表示 ---------- */
+.u-label{font-size:12px;font-weight:700;color:var(--muted);margin:16px 0 8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.u-label .v{color:var(--ink);font-family:"Roboto Mono",monospace}
+.sec-row{display:flex;gap:8px;align-items:center;margin-top:8px}
+.sec-row input{width:90px;padding:10px;border:1.5px solid var(--line);border-radius:10px;background:var(--field);color:var(--ink);font:inherit;font-size:15px;text-align:center}
+.sec-row span{font-size:13px;color:var(--muted)}
+.nt-ta{width:100%;min-height:70px;padding:12px;border:1.5px solid var(--line);border-radius:10px;
+  background:var(--field);color:var(--ink);font:inherit;font-size:16px;resize:vertical;box-sizing:border-box}
+.nt-ta:focus{border-color:var(--ink);background:var(--card);outline:none}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.chip{padding:7px 11px;border-radius:999px;border:1.5px solid var(--line);background:var(--field);color:var(--muted);font-size:12.5px;font-weight:700}
+.chip:active{transform:translateY(1px)}
+.swatches{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sw{width:34px;height:34px;border-radius:50%;border:2px solid var(--line);padding:0;position:relative}
+.sw.on{box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--teal)}
+.sw-custom{width:34px;height:34px;border-radius:50%;overflow:hidden;border:2px dashed var(--line);position:relative;display:inline-block}
+.sw-custom input{position:absolute;inset:-8px;width:calc(100% + 16px);height:calc(100% + 16px);border:none;padding:0;cursor:pointer;opacity:0}
+.sw-custom.on{border-style:solid;box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--teal)}
+.sw-custom .plus{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:var(--muted);pointer-events:none}
+.nt-range{width:100%;accent-color:var(--teal)}
+.nt-preview{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;padding:4% 5%;box-sizing:border-box}
+.nt-preview .nt-text{white-space:pre-wrap;word-break:break-word;text-align:center;font-weight:900;line-height:1.3;max-width:100%}
+.nt-preview .nt-tag{position:absolute;left:8px;top:6px;font-size:10px;font-weight:700;letter-spacing:.1em;opacity:.55;color:inherit}
+.nt-live{font-size:13px;font-weight:700;padding:10px 12px;border-radius:9px;background:var(--field);color:var(--muted);margin:14px 0 10px;text-align:center}
+.nt-live.on{background:var(--amber-soft);color:var(--amber-ink)}
+.dialog .recap div.nt-preview{margin:2px 0;display:flex;justify-content:center;align-items:center;padding:4% 5%}
+.dialog .recap div.nt-text{display:block;padding:0}
+
 /* ---------- QR overlay ---------- */
 .qr-wrap{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.9);display:flex;flex-direction:column}
 .qr-head{display:flex;align-items:center;gap:10px;padding:14px 16px;color:#fff}
@@ -419,7 +448,7 @@ body.has-tabbar .app{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px) 
     <button class="hamb" data-menu aria-label="メニューを開く"><span></span><span></span><span></span></button>
   </div>
   <div class="hero">
-    <div class="eyebrow">Ver.2.2</div>
+    <div class="eyebrow">Ver.2.3</div>
     <h2>売上計算ツール</h2>
     <p>ファイルを作って商品を登録。＋と－で数えるだけ。</p>
   </div>
@@ -602,6 +631,59 @@ body.has-tabbar .app{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px) 
       <button class="btn btn-ghost" id="pinConnectBtn">このPINで接続</button>
     </div>
   </div>
+
+  <div class="panel">
+    <h3>待機スライドショー（外部ディスプレイ）</h3>
+    <p class="u-desc">会計していない間、外部ディスプレイに画像を順番に表示します。金額が入ると自動で計算画面に切り替わります。<br>画像は外部ディスプレイ側の「⚙ 設定」で登録してください。</p>
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-title">待機中にスライドショーを表示</div>
+        <div class="toggle-sub" id="slideSub">ON</div>
+      </div>
+      <button type="button" class="toggle" id="slideToggle" role="switch" aria-checked="false"><span class="knob"></span></button>
+    </div>
+    <div class="u-label">1枚あたりの表示時間 <span class="v" id="slideSecVal">6秒</span></div>
+    <div class="segbtns" id="slideSecBtns">
+      <button type="button" class="seg" data-sec="3">3秒</button>
+      <button type="button" class="seg" data-sec="5">5秒</button>
+      <button type="button" class="seg" data-sec="8">8秒</button>
+      <button type="button" class="seg" data-sec="10">10秒</button>
+      <button type="button" class="seg" data-sec="15">15秒</button>
+    </div>
+    <div class="sec-row">
+      <input id="slideSecInput" type="number" inputmode="numeric" min="2" max="120" step="1" placeholder="6">
+      <span>秒（2〜120秒で自由に指定）</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>お知らせ表示（外部ディスプレイ）</h3>
+    <p class="u-desc">「サークル主離席中」などの文字を、外部ディスプレイ全面に割り込み表示します。プレビューで確認してからOKで表示されます。</p>
+    <textarea id="ntText" class="nt-ta" placeholder="例：サークル主離席中" spellcheck="false"></textarea>
+    <div class="chips" id="ntPresets">
+      <button type="button" class="chip">サークル主離席中</button>
+      <button type="button" class="chip">少々お待ちください</button>
+      <button type="button" class="chip">ただいま休憩中です</button>
+      <button type="button" class="chip">完売しました</button>
+      <button type="button" class="chip">本日の頒布は終了しました</button>
+    </div>
+
+    <div class="u-label">文字の色</div>
+    <div class="swatches" id="ntColorSw"></div>
+    <div class="u-label">背景の色</div>
+    <div class="swatches" id="ntBgSw"></div>
+
+    <div class="u-label">文字の大きさ <span class="v" id="ntSizeVal">18</span></div>
+    <input type="range" id="ntSize" class="nt-range" min="5" max="45" step="1" value="18">
+
+    <div class="u-label">プレビュー（外部ディスプレイの見え方）</div>
+    <div class="nt-preview" id="ntPreview"><span class="nt-tag">PREVIEW</span><div class="nt-text" id="ntPreviewText"></div></div>
+
+    <div class="nt-live" id="ntLive">外部ディスプレイ：表示していません</div>
+    <button class="btn btn-primary" id="ntShowBtn">この内容で表示する</button>
+    <div style="height:8px"></div>
+    <button class="btn btn-ghost" id="ntHideBtn">お知らせ表示を解除</button>
+  </div>
 </section>
 
 <!-- ===== FOOTER (total) ===== -->
@@ -673,7 +755,10 @@ window.SALESYNC_API = "https://sale-sync.pages.dev/api";
                qty:Number(it.qty)||0, kind:String(it.kind==null?"":it.kind) }; // kind を保持
     });
     const total = Number.isFinite(s.total) ? s.total : items.reduce(function(a,it){ return a+it.price*it.qty; },0);
-    return { title: s.title!=null ? String(s.title) : undefined, items:items, total:total };
+    const out = { title: s.title!=null ? String(s.title) : undefined, items:items, total:total };
+    if(s.slide)  out.slide  = s.slide;   // 待機スライドショー設定 {on, sec}
+    if(s.notice) out.notice = s.notice;  // お知らせ表示 {on, text, color, bg, size}
+    return out;
   }
   function update(state){
     lastState = normalize(state);
@@ -1252,7 +1337,7 @@ function confirmDialog(o){
 }
 
 /* ---------- menu ---------- */
-var APP_VER = "Ver.2.2";
+var APP_VER = "Ver.2.3";
 var X_ID = "H4ru_ycy";
 var MAIL = "h4ru.kyi2943@gmail.com";
 var THEME_KEY = "sales:theme";
@@ -1305,7 +1390,12 @@ function menuHome(){
 }
 function menuHistory(){
   var log = [
-    ["Ver.2.2", "最新", [
+    ["Ver.2.3", "最新", [
+      "ユーティリティに「待機スライドショー」を追加：外部ディスプレイの待機中スライドショーのON/OFFと1枚あたりの秒数（2〜120秒）をこの端末から変更",
+      "ユーティリティに「お知らせ表示」を追加：「サークル主離席中」などを手入力し、文字の色・背景の色・大きさを指定して外部ディスプレイ全面に表示",
+      "お知らせはプレビューで確認→OKで表示。「解除」で通常の表示に戻る"
+    ]],
+    ["Ver.2.2", "", [
       "計算画面をレジ方式に刷新：下部の左に「売上（確定した会計の合計）」、右に「今の会計」を表示",
       "商品カードの個数・金額は1会計ごとの表示に（会計完了で×0にリセット）",
       "「会計完了」を常時表示。押すと今の会計が売上に加算され、次の会計へ。外部ディスプレイは従来どおり"
@@ -1424,6 +1514,9 @@ function menuHelp(){
       '・使い方：トグルをON →「QRコードを読み取って接続」またはディスプレイに出た<b style="display:inline">8桁のPIN</b>を入力。<br>'+
       '・接続後は、＋／－や商品追加が自動でディスプレイに反映されます（認証は1日1回・9時間有効）。<br>'+
       '・単独で使うときはOFFのままでOKです。</div>'+
+    '<div class="note" style="margin-top:10px"><b>待機スライドショー / お知らせ表示（ユーティリティ）</b>'+
+      '・待機スライドショー：会計していない間に外部ディスプレイで画像を順番に表示。ON/OFFと秒数をここで変えられます（画像は外部ディスプレイの⚙設定で登録）。<br>'+
+      '・お知らせ表示：「サークル主離席中」などを入力し、文字の色・背景・大きさを選んでプレビュー → OKで外部ディスプレイ全面に表示。「解除」で元に戻ります。</div>'+
     '<div class="note" style="margin-top:10px"><b>在庫について</b>'+
       '・カードに「残り〇」と表示されます。残り3以下で黄色、0で赤色になります。<br>'+
       '・在庫が0になると「＋」は押せなくなります。<br>'+
@@ -1758,6 +1851,18 @@ async function applyImport(data, mode){
 var EXT_KEY = "sales:extOn";
 var extOn = false;
 try{ extOn = JSON.parse(localStorage.getItem(EXT_KEY)||"false"); }catch(e){}
+/* 外部ディスプレイの表示設定（スライドショー・お知らせ）。draft=編集中、live=表示中 */
+var EXT_DISP_KEY = "sales:extDisplay";
+var extDisp = { slideOn:true, slideSec:6, draft:{ text:"サークル主離席中", color:"#FFFFFF", bg:"#201830", size:18 }, live:null };
+try{
+  var _ed = JSON.parse(localStorage.getItem(EXT_DISP_KEY)||"null");
+  if(_ed){
+    if(typeof _ed.slideOn === "boolean") extDisp.slideOn = _ed.slideOn;
+    if(_ed.slideSec) extDisp.slideSec = Math.max(2, Math.min(120, Math.round(Number(_ed.slideSec))||6));
+    if(_ed.draft) for(var _k in extDisp.draft){ if(_ed.draft[_k] != null) extDisp.draft[_k] = _ed.draft[_k]; }
+    if(_ed.live && _ed.live.text) extDisp.live = _ed.live;
+  }
+}catch(e){}
 var SS = window.SalesSync || null;
 
 function extActive(){ return !!(SS && SS.isActive && SS.isActive()); }
@@ -1777,10 +1882,17 @@ function currentCheckout(){
   return { items:items, total:total };
 }
 function extPayload(){
-  if(!sess) return { title:"", items:[], total:0 };
-  var c = currentCheckout();
-  return { title: sess.name + (sess.date ? "　" + sess.date : ""),
-    total: c.total, items: c.items };
+  var p;
+  if(!sess) p = { title:"", items:[], total:0 };
+  else {
+    var c = currentCheckout();
+    p = { title: sess.name + (sess.date ? "　" + sess.date : ""), total: c.total, items: c.items };
+  }
+  p.slide = { on: !!extDisp.slideOn, sec: extDisp.slideSec };
+  p.notice = extDisp.live && extDisp.live.text
+    ? { on:true, text:extDisp.live.text, color:extDisp.live.color, bg:extDisp.live.bg, size:extDisp.live.size }
+    : { on:false };
+  return p;
 }
 function extPush(){ if(extOn && SS && extActive()){ try{ SS.update(extPayload()); }catch(e){} } }
 
@@ -1811,6 +1923,7 @@ function refreshExtUI(){
     if(extActive()){ st.className="ext-status on"; st.textContent="接続中（同期しています）"; }
     else { st.className="ext-status"; st.textContent="未接続：QR読み取りか8桁PINで接続してください"; }
   }
+  if($("ntLive") && typeof NT_COLORS !== "undefined"){ try{ refreshNoticeUI(); }catch(e){} }
 }
 $("extToggle").addEventListener("click", function(){
   extOn = !extOn;
@@ -1879,6 +1992,136 @@ function startQR(){
     scan();
   })();
 }
+
+/* ============ 外部ディスプレイ：待機スライドショー／お知らせ表示 ============ */
+var NT_COLORS = ["#FFFFFF","#F6C56B","#FF6B6B","#7FD4FF","#6FE0B0","#FFB3D1","#111111"];
+var NT_BGS    = ["#201830","#000000","#FFFFFF","#7A1F2B","#0C1730","#0F3D2E","#F6C56B"];
+function extDispSave(){ try{ localStorage.setItem(EXT_DISP_KEY, JSON.stringify(extDisp)); }catch(e){} }
+function clampSec(v){ v = Math.round(Number(v)); if(!isFinite(v)) v = 6; return Math.max(2, Math.min(120, v)); }
+
+/* 文字を枠に収める：大きさ(%)＝枠の高さに対する割合。はみ出す時だけ自動で縮小 */
+function fitNotice(box, el, sizePct){
+  var h = box.clientHeight; if(!h) return;
+  var fs = h * sizePct / 100;
+  el.style.fontSize = fs + "px";
+  for(var i=0; i<40 && (box.scrollHeight > box.clientHeight + 1 || el.scrollWidth > box.clientWidth + 1); i++){
+    fs *= 0.93; el.style.fontSize = fs + "px";
+  }
+}
+function paintPreview(box, textEl, d){
+  box.style.background = d.bg; box.style.color = d.color;
+  textEl.textContent = d.text || "（文字を入力してください）";
+  textEl.style.opacity = d.text ? "1" : ".45";
+  fitNotice(box, textEl, d.size);
+}
+function renderSwatches(rootId, list, cur, key){
+  var root = $(rootId);
+  var inList = list.some(function(c){ return c.toLowerCase() === String(cur).toLowerCase(); });
+  root.innerHTML = list.map(function(c){
+    return '<button type="button" class="sw'+(c.toLowerCase()===String(cur).toLowerCase()?' on':'')+'" data-c="'+c+'" style="background:'+c+'" aria-label="'+c+'"></button>';
+  }).join("") +
+  '<label class="sw-custom'+(inList?'':' on')+'" style="'+(inList?'':'background:'+cur)+'" title="自由に選ぶ">'+
+    (inList?'<span class="plus">＋</span>':'')+
+    '<input type="color" data-k="'+key+'" value="'+(/^#[0-9a-f]{6}$/i.test(cur)?cur:"#ffffff")+'"></label>';
+}
+function refreshNoticeUI(){
+  var d = extDisp.draft;
+  if($("ntText").value !== d.text) $("ntText").value = d.text;
+  renderSwatches("ntColorSw", NT_COLORS, d.color, "color");
+  renderSwatches("ntBgSw", NT_BGS, d.bg, "bg");
+  $("ntSize").value = d.size; $("ntSizeVal").textContent = d.size;
+  paintPreview($("ntPreview"), $("ntPreviewText"), d);
+  var live = $("ntLive");
+  if(extDisp.live && extDisp.live.text){
+    live.className = "nt-live on";
+    live.textContent = "表示中：「" + extDisp.live.text.replace(/\n/g," ") + "」" + (extActive() ? "" : "（接続後に表示されます）");
+  } else { live.className = "nt-live"; live.textContent = "外部ディスプレイ：表示していません"; }
+  $("ntHideBtn").classList.toggle("hidden", !(extDisp.live && extDisp.live.text));
+}
+function refreshSlideUI(){
+  var tg = $("slideToggle");
+  tg.classList.toggle("on", !!extDisp.slideOn);
+  tg.setAttribute("aria-checked", extDisp.slideOn ? "true" : "false");
+  $("slideSub").textContent = extDisp.slideOn ? "ON（待機中は画像を表示）" : "OFF（待機中も計算画面のまま）";
+  $("slideSecVal").textContent = extDisp.slideSec + "秒";
+  $("slideSecBtns").querySelectorAll("[data-sec]").forEach(function(b){
+    b.classList.toggle("on", Number(b.dataset.sec) === extDisp.slideSec);
+  });
+  if(document.activeElement !== $("slideSecInput")) $("slideSecInput").value = extDisp.slideSec;
+}
+function extDispChanged(){ extDispSave(); extPush(); }
+
+$("slideToggle").addEventListener("click", function(){
+  extDisp.slideOn = !extDisp.slideOn; refreshSlideUI(); extDispChanged();
+  toast(extDisp.slideOn ? "待機スライドショーをONにしました" : "待機スライドショーをOFFにしました");
+});
+$("slideSecBtns").addEventListener("click", function(e){
+  var b = e.target.closest("[data-sec]"); if(!b) return;
+  extDisp.slideSec = clampSec(b.dataset.sec); refreshSlideUI(); extDispChanged();
+});
+$("slideSecInput").addEventListener("change", function(){
+  extDisp.slideSec = clampSec(this.value); this.value = extDisp.slideSec;
+  refreshSlideUI(); extDispChanged(); toast("表示時間を" + extDisp.slideSec + "秒にしました");
+});
+
+$("ntText").addEventListener("input", function(){
+  extDisp.draft.text = this.value; extDispSave();
+  paintPreview($("ntPreview"), $("ntPreviewText"), extDisp.draft);
+});
+$("ntPresets").addEventListener("click", function(e){
+  var b = e.target.closest(".chip"); if(!b) return;
+  extDisp.draft.text = b.textContent; extDispSave(); refreshNoticeUI();
+});
+function onSwatch(e){
+  var b = e.target.closest(".sw"); if(!b) return;
+  var key = this.id === "ntColorSw" ? "color" : "bg";
+  extDisp.draft[key] = b.dataset.c; extDispSave(); refreshNoticeUI();
+}
+function onCustomColor(e){
+  if(!e.target.matches('input[type="color"]')) return;
+  extDisp.draft[e.target.dataset.k] = e.target.value; extDispSave();
+  if(e.type === "change") refreshNoticeUI();
+  else paintPreview($("ntPreview"), $("ntPreviewText"), extDisp.draft);
+}
+["ntColorSw","ntBgSw"].forEach(function(id){
+  $(id).addEventListener("click", onSwatch);
+  $(id).addEventListener("input", onCustomColor);
+  $(id).addEventListener("change", onCustomColor);
+});
+$("ntSize").addEventListener("input", function(){
+  extDisp.draft.size = Number(this.value); $("ntSizeVal").textContent = this.value; extDispSave();
+  paintPreview($("ntPreview"), $("ntPreviewText"), extDisp.draft);
+});
+window.addEventListener("resize", function(){ paintPreview($("ntPreview"), $("ntPreviewText"), extDisp.draft); });
+
+/* 表示する：確認ダイアログでプレビュー → OKで外部ディスプレイへ */
+$("ntShowBtn").addEventListener("click", function(){
+  var d = extDisp.draft;
+  if(!String(d.text||"").trim()){ toast("表示する文字を入力してください"); return; }
+  confirmDialog({
+    title: "お知らせを表示しますか？",
+    body: extActive() ? "外部ディスプレイの全面にこの内容を表示します。解除するまで計算画面より優先されます。"
+                      : "まだ外部ディスプレイに接続していません。接続するとこの内容で表示されます。",
+    recap: '<div class="nt-preview" id="ntDlgPreview"><div class="nt-text" id="ntDlgText"></div></div>',
+    ok: "OK・表示する",
+    onOk: function(){
+      extDisp.live = { text:d.text, color:d.color, bg:d.bg, size:d.size };
+      extDispChanged(); refreshNoticeUI();
+      toast(extActive() ? "お知らせを表示しました" : "接続後に表示されます");
+    }
+  });
+  requestAnimationFrame(function(){ var b=$("ntDlgPreview"); if(b) paintPreview(b, $("ntDlgText"), d); });
+});
+$("ntHideBtn").addEventListener("click", function(){
+  extDisp.live = null; extDispChanged(); refreshNoticeUI();
+  toast("お知らせ表示を解除しました");
+});
+
+/* ユーティリティを開いた時にプレビューを描き直す（非表示中はサイズが0のため） */
+document.querySelectorAll('.tab[data-view="utility"]').forEach(function(t){
+  t.addEventListener("click", function(){ requestAnimationFrame(function(){ refreshNoticeUI(); refreshSlideUI(); }); });
+});
+refreshSlideUI(); refreshNoticeUI();
 
 /* 外部出力の起動：ONで、保存済みセッションが有効ならそのまま同期継続 */
 refreshExtUI();
