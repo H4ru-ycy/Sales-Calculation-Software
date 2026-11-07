@@ -339,6 +339,17 @@ body.has-tabbar .app{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px) 
 .nt-preview .nt-tag{position:absolute;left:8px;top:6px;font-size:10px;font-weight:700;letter-spacing:.1em;opacity:.55;color:inherit}
 .nt-live{font-size:13px;font-weight:700;padding:10px 12px;border-radius:9px;background:var(--field);color:var(--muted);margin:14px 0 10px;text-align:center}
 .nt-live.on{background:var(--amber-soft);color:var(--amber-ink)}
+.sl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-bottom:10px}
+.sl-item{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--field);aspect-ratio:4/3}
+.sl-item img{width:100%;height:100%;object-fit:cover;display:block}
+.sl-item .no{position:absolute;left:5px;top:5px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:700;line-height:20px;text-align:center}
+.sl-item .rm{position:absolute;right:4px;top:4px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:13px;line-height:26px;text-align:center;padding:0;border:none}
+.sl-item .mv{position:absolute;bottom:4px;display:flex;gap:4px;left:4px;right:4px;justify-content:space-between}
+.sl-item .mv button{width:28px;height:24px;border-radius:7px;background:rgba(0,0,0,.6);color:#fff;font-size:14px;line-height:24px;padding:0;border:none}
+.sl-item .mv button:disabled{opacity:.25}
+.sl-empty{grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;padding:20px 10px;border:1.5px dashed var(--line);border-radius:12px}
+.nt-live.err{background:var(--clay-soft);color:var(--clay)}
+.nt-live.ok{background:var(--banner-bg);color:var(--teal)}
 .dialog .recap div.nt-preview{margin:2px 0;display:flex;justify-content:center;align-items:center;padding:4% 5%}
 .dialog .recap div.nt-text{display:block;padding:0}
 
@@ -448,7 +459,7 @@ body.has-tabbar .app{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px) 
     <button class="hamb" data-menu aria-label="メニューを開く"><span></span><span></span><span></span></button>
   </div>
   <div class="hero">
-    <div class="eyebrow">Ver.2.3</div>
+    <div class="eyebrow">Ver.2.4</div>
     <h2>売上計算ツール</h2>
     <p>ファイルを作って商品を登録。＋と－で数えるだけ。</p>
   </div>
@@ -634,7 +645,7 @@ body.has-tabbar .app{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px) 
 
   <div class="panel">
     <h3>待機スライドショー（外部ディスプレイ）</h3>
-    <p class="u-desc">会計していない間、外部ディスプレイに画像を順番に表示します。金額が入ると自動で計算画面に切り替わります。<br>画像は外部ディスプレイ側の「⚙ 設定」で登録してください。</p>
+    <p class="u-desc">会計していない間、外部ディスプレイに画像を順番に表示します。金額が入ると自動で計算画面に切り替わります。<br>画像はここで追加・削除・並べ替えでき、外部ディスプレイに自動で送られます。</p>
     <div class="toggle-row">
       <div>
         <div class="toggle-title">待機中にスライドショーを表示</div>
@@ -654,6 +665,11 @@ body.has-tabbar .app{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px) 
       <input id="slideSecInput" type="number" inputmode="numeric" min="2" max="120" step="1" placeholder="6">
       <span>秒（2〜120秒で自由に指定）</span>
     </div>
+    <div class="u-label">表示する画像 <span class="v" id="slideCount">0/20</span></div>
+    <div class="sl-grid" id="slideGrid"></div>
+    <button class="btn btn-primary" id="slideAddBtn">画像を追加</button>
+    <input type="file" id="slideFile" accept="image/*" multiple hidden>
+    <div class="nt-live" id="slideSync" style="margin-bottom:0">画像は未登録です</div>
   </div>
 
   <div class="panel">
@@ -775,6 +791,16 @@ window.SALESYNC_API = "https://sale-sync.pages.dev/api";
       if(r && r.error === "expired"){ drop(); }
     }catch(e){}
   }
+  async function pushMedia(slides, ver){
+    if(!active()) return { error:"inactive" };
+    try{
+      const r = await api("/media/push", { method:"POST", body: JSON.stringify({
+        sessionId: sess.sessionId, sellerToken: sess.sellerToken, ver: ver, slides: slides||[] }) });
+      if(r && r.error === "expired"){ drop(); }
+      return r || { error:"network" };
+    }catch(e){ return { error:"network" }; }
+  }
+  function sessionId(){ return active() ? sess.sessionId : null; }
   async function connectWithPin(pin){
     pin = String(pin||"").replace(/\D/g,"");
     if(pin.length !== 8) return false;
@@ -786,7 +812,8 @@ window.SALESYNC_API = "https://sale-sync.pages.dev/api";
     }
     return false;
   }
-  global.SalesSync = { update:update, connectWithPin:connectWithPin, disconnect:drop, isActive:active, _config:CONFIG };
+  global.SalesSync = { update:update, connectWithPin:connectWithPin, pushMedia:pushMedia, sessionId:sessionId,
+                       disconnect:drop, isActive:active, _config:CONFIG };
 })(window);
 </script>
 <script>
@@ -1337,7 +1364,7 @@ function confirmDialog(o){
 }
 
 /* ---------- menu ---------- */
-var APP_VER = "Ver.2.3";
+var APP_VER = "Ver.2.4";
 var X_ID = "H4ru_ycy";
 var MAIL = "h4ru.kyi2943@gmail.com";
 var THEME_KEY = "sales:theme";
@@ -1390,7 +1417,11 @@ function menuHome(){
 }
 function menuHistory(){
   var log = [
-    ["Ver.2.3", "最新", [
+    ["Ver.2.4", "最新", [
+      "待機スライドショーの画像を売上計算ツールから追加・削除・並べ替えできるように（最大20枚、外部ディスプレイへ自動送信）",
+      "毎日つなぎ直しても、登録済みの画像は接続時に自動で送り直す"
+    ]],
+    ["Ver.2.3", "", [
       "ユーティリティに「待機スライドショー」を追加：外部ディスプレイの待機中スライドショーのON/OFFと1枚あたりの秒数（2〜120秒）をこの端末から変更",
       "ユーティリティに「お知らせ表示」を追加：「サークル主離席中」などを手入力し、文字の色・背景の色・大きさを指定して外部ディスプレイ全面に表示",
       "お知らせはプレビューで確認→OKで表示。「解除」で通常の表示に戻る"
@@ -1515,7 +1546,7 @@ function menuHelp(){
       '・接続後は、＋／－や商品追加が自動でディスプレイに反映されます（認証は1日1回・9時間有効）。<br>'+
       '・単独で使うときはOFFのままでOKです。</div>'+
     '<div class="note" style="margin-top:10px"><b>待機スライドショー / お知らせ表示（ユーティリティ）</b>'+
-      '・待機スライドショー：会計していない間に外部ディスプレイで画像を順番に表示。ON/OFFと秒数をここで変えられます（画像は外部ディスプレイの⚙設定で登録）。<br>'+
+      '・待機スライドショー：会計していない間に外部ディスプレイで画像を順番に表示。ON/OFF・秒数・画像（追加／削除／並べ替え、最大20枚）をここで設定。画像は接続中の外部ディスプレイへ自動で送られます。<br>'+
       '・お知らせ表示：「サークル主離席中」などを入力し、文字の色・背景・大きさを選んでプレビュー → OKで外部ディスプレイ全面に表示。「解除」で元に戻ります。</div>'+
     '<div class="note" style="margin-top:10px"><b>在庫について</b>'+
       '・カードに「残り〇」と表示されます。残り3以下で黄色、0で赤色になります。<br>'+
@@ -1888,13 +1919,18 @@ function extPayload(){
     var c = currentCheckout();
     p = { title: sess.name + (sess.date ? "　" + sess.date : ""), total: c.total, items: c.items };
   }
-  p.slide = { on: !!extDisp.slideOn, sec: extDisp.slideSec };
+  p.slide = slidePayload();
   p.notice = extDisp.live && extDisp.live.text
     ? { on:true, text:extDisp.live.text, color:extDisp.live.color, bg:extDisp.live.bg, size:extDisp.live.size }
     : { on:false };
   return p;
 }
-function extPush(){ if(extOn && SS && extActive()){ try{ SS.update(extPayload()); }catch(e){} } }
+function extPush(){
+  if(extOn && SS && extActive()){
+    try{ SS.update(extPayload()); }catch(e){}
+    if(typeof syncSlides === "function") syncSlides();
+  }
+}
 
 /* 会計完了：今の会計分を1件記録し、次の会計へ（外部表示は¥0に戻る）。累計・販売数は保持。 */
 $("checkoutBtn").addEventListener("click", async function(){
@@ -1924,6 +1960,7 @@ function refreshExtUI(){
     else { st.className="ext-status"; st.textContent="未接続：QR読み取りか8桁PINで接続してください"; }
   }
   if($("ntLive") && typeof NT_COLORS !== "undefined"){ try{ refreshNoticeUI(); }catch(e){} }
+  if(typeof renderSlideSync === "function"){ try{ renderSlideSync(); }catch(e){} }
 }
 $("extToggle").addEventListener("click", function(){
   extOn = !extOn;
@@ -2117,21 +2154,34 @@ $("ntHideBtn").addEventListener("click", function(){
   toast("お知らせ表示を解除しました");
 });
 
-/* ユーティリティを開いた時にプレビューを描き直す（非表示中はサイズが0のため） */
-document.querySelectorAll('.tab[data-view="utility"]').forEach(function(t){
-  t.addEventListener("click", function(){ requestAnimationFrame(function(){ refreshNoticeUI(); refreshSlideUI(); }); });
-});
-refreshSlideUI(); refreshNoticeUI();
+/* ---------- スライドショー画像（この端末のIndexedDBに保存 → 外部ディスプレイへ送信） ---------- */
+var SLIDE_MAX = 20;                         // サーバー側の上限と同じ
+var SLIDE_SENT_KEY = "sales:slideSent";     // どのセッションにどの版を送ったか
+var slideImgs = [];                         // [{id, data}]
+var slideVer = "";
+var slideSent = null; try{ slideSent = JSON.parse(localStorage.getItem(SLIDE_SENT_KEY)||"null"); }catch(e){}
+var slideBusy = false, slideErr = "";
 
-/* 外部出力の起動：ONで、保存済みセッションが有効ならそのまま同期継続 */
-refreshExtUI();
-if(extOn) extPush();
+function sidb(){
+  return new Promise(function(res, rej){
+    var r = indexedDB.open("sales-slides", 1);
+    r.onupgradeneeded = function(){ r.result.createObjectStore("kv"); };
+    r.onsuccess = function(){ res(r.result); }; r.onerror = function(){ rej(r.error); };
+  });
+}
+function sidbGet(k){ return sidb().then(function(db){ return new Promise(function(res,rej){
+  var q = db.transaction("kv","readonly").objectStore("kv").get(k); q.onsuccess=function(){ res(q.result||null); }; q.onerror=function(){ rej(q.error); }; }); }); }
+function sidbSet(k,v){ return sidb().then(function(db){ return new Promise(function(res,rej){
+  var t = db.transaction("kv","readwrite"); t.objectStore("kv").put(v,k); t.oncomplete=function(){ res(); }; t.onerror=function(){ rej(t.error); }; }); }); }
 
-document.body.classList.add("has-tabbar");
-showView("inventory");
-
-loadIndex();
-})();
-</script>
-</body>
-</html>
+function slideSentOk(){
+  var sid = SS && SS.sessionId ? SS.sessionId() : null;
+  return !!(sid && slideSent && slideSent.sid === sid && slideSent.ver === slideVer);
+}
+function slidePayload(){
+  var ok = slideSentOk();
+  return { on: !!extDisp.slideOn, sec: extDisp.slideSec, ver: ok ? slideVer : "", count: ok ? slideImgs.length : 0 };
+}
+async function saveSlides(){
+  slideVer = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+  try{ await sidbSet("sl
