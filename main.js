@@ -135,6 +135,7 @@ function openEditor(s){
   $("curLabel").textContent = s.locked ? "売上合計" : "今の会計";
   if(!s.checkoutBase) s.checkoutBase = {};
   updateCheckoutBtn();
+  renderRec();
   setItemKind("");
   renderItems(); renderTotal();
   extPush();
@@ -142,6 +143,7 @@ function openEditor(s){
 }
 function backHome(){
   sess = null; selId = null; curView = "home";
+  clearInterval(recTimer); recTimer = null;
   sdel(LAST);
   $("editor").classList.add("hidden");
   $("footer").classList.add("hidden");
@@ -524,13 +526,9 @@ $("finishBtn").addEventListener("click", function(){
     ok: "終了して保存する",
     onOk: async function(){
       // 計算中の会計があれば最後の1会計として確定
-      if(open.total > 0){
-        if(!sess.checkoutBase) sess.checkoutBase = {};
-        (sess.items||[]).forEach(function(it){ sess.checkoutBase[it.id] = it.qty; });
-        if(!sess.checkouts) sess.checkouts = [];
-        sess.checkouts.push({ amount:open.total, count:open.items.reduce(function(a,i){return a+i.qty;},0), ts:Date.now() });
-      }
+      if(open.total > 0) recordCheckout(open);
       sess.locked = true; sess.closedAt = Date.now(); selId = null;
+      if(sess.startedAt && !sess.stoppedAt) sess.stoppedAt = sess.closedAt;   // 時刻の記録を停止
       await persist();
       openEditor(sess);
       toast("記録しました");
@@ -561,7 +559,7 @@ function confirmDialog(o){
 }
 
 /* ---------- menu ---------- */
-var APP_VER = "Ver.2.4";
+var APP_VER = "Ver.2.6";
 var X_ID = "H4ru_ycy";
 var MAIL = "h4ru.kyi2943@gmail.com";
 var THEME_KEY = "sales:theme";
@@ -614,7 +612,12 @@ function menuHome(){
 }
 function menuHistory(){
   var log = [
-    ["Ver.2.4", "最新", [
+    ["Ver.2.6", "最新", [
+      "計算タブの「商品を追加」に「開始」ボタンを追加。開始〜「終了する」までの間、時刻を記録",
+      "会計完了のたびに、時刻・開始からの経過・商品別の販売数を1会計ずつ記録",
+      "CSV出力に「会計ごとの記録」と「商品別・1分ごとの販売数」の表を追加（30分ごとの表は廃止）"
+    ]],
+    ["Ver.2.4", "", [
       "待機スライドショーの画像を売上計算ツールから追加・削除・並べ替えできるように（最大20枚、外部ディスプレイへ自動送信）",
       "毎日つなぎ直しても、登録済みの画像は接続時に自動で送り直す",
       "ファイルを開いて計算している間も下部タブを表示。計算の途中でユーティリティ（お知らせ表示など）へ移って、「計算」タブでそのまま戻れるように"
@@ -734,6 +737,7 @@ function menuHelp(){
       '・<b style="display:inline">ユーティリティ</b>：CSV出力・バックアップ・外部出力の設定。</div>'+
     '<div class="note" style="margin-top:10px"><b>CSV出力（ユーティリティ）</b>'+
       '・すべての記録をCSVファイルで書き出せます。Excelやスプレッドシートで開けます。<br>'+
+      '・計算タブの「開始」を押したファイルは、後半に「会計ごとの記録」（時刻・経過・商品別の数）と「商品別・1分ごとの販売数」の表も入ります。記録は「終了する」で停止します。<br>'+
       '・fileが使えない環境では「コピー」で貼り付け用に出力できます。</div>'+
     '<div class="note" style="margin-top:10px"><b>バックアップ / 引き継ぎ（ユーティリティ）</b>'+
       '・記録はこの端末内に保存されます。別の端末へ移すときは、ここで書き出したデータを移動先で読み込みます。<br>'+
@@ -976,7 +980,66 @@ async function buildCSV(){
       ].join(","));
     });
   });
+  var slots = buildSlotCSV(sessions);
+  if(slots.length) lines = lines.concat([""], slots);
   return lines.join("\r\n");
+}
+
+/* 「開始」〜「終了する」の記録：会計ごとの表 ＋ 商品別・1分ごとの販売数（ファイルごと、列=商品） */
+var MIN_MS = 60 * 1000;
+function hhmm(d){ return String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0"); }
+function minStart(ts){ var d = new Date(ts); d.setSeconds(0, 0); return d.getTime(); }
+function elapsedLabel(ms){ var m = Math.max(0, Math.floor(ms / MIN_MS)); return Math.floor(m/60) + ":" + String(m%60).padStart(2,"0"); }
+function buildSlotCSV(sessions){
+  var out = [];
+  sessions.forEach(function(s){
+    if(!s.startedAt) return;                                   // 「開始」を押していないファイルは対象外
+    var items = (s.items||[]).filter(function(it){ return it.qty > 0 || (s.checkouts||[]).some(function(c){
+      return (c.items||[]).some(function(x){ return x.id === it.id; }); }); });
+    if(!items.length) return;
+    var col = {}; items.forEach(function(it, i){ col[it.id] = i; });
+    var zero = function(){ return items.map(function(){ return 0; }); };
+    var headNames = items.map(function(it){ return (it.name||"（無題）") + (it.kind ? "（"+it.kind+"）" : ""); });
+    var recs = (s.checkouts||[]).filter(function(c){ return c.el != null && Array.isArray(c.items); });
+    var stopAt = s.stoppedAt || s.closedAt || Date.now();
+
+    // --- 会計ごとの記録 ---
+    if(out.length) out.push("");
+    out.push(["【会計ごとの記録】" + (s.date||""), s.name, "開始 " + hhmm(new Date(s.startedAt)),
+              (s.stoppedAt ? "終了 " + hhmm(new Date(s.stoppedAt)) : "記録中")].map(csvCell).join(","));
+    out.push(["会計No","時刻","経過"].concat(headNames, ["点数","金額"]).map(csvCell).join(","));
+    recs.forEach(function(c, n){
+      var row = zero();
+      c.items.forEach(function(x){ if(x.id in col) row[col[x.id]] += x.qty; });
+      var t = new Date(c.ts);
+      out.push([n+1, hhmm(t) + ":" + String(t.getSeconds()).padStart(2,"0"), fmtElapsed(c.el)].concat(row, [c.count, c.amount]).map(csvCell).join(","));
+    });
+    if(!recs.length) out.push(csvCell("（記録された会計はまだありません）"));
+    var pre = (s.checkouts||[]).filter(function(c){ return c.el == null; });
+    if(pre.length) out.push(csvCell("※「開始」前の会計 " + pre.length + "回・" +
+      pre.reduce(function(x,c){ return x+(c.count||0); }, 0) + "点はこの表と下の表に含みません"));
+
+    // --- 1分ごとの販売数（会計完了の時刻で集計） ---
+    var map = {};
+    recs.forEach(function(c){
+      var k = minStart(c.ts);
+      if(!map[k]) map[k] = zero();
+      c.items.forEach(function(x){ if(x.id in col) map[k][col[x.id]] += x.qty; });
+    });
+    out.push("");
+    out.push(["【1分ごとの販売数】" + (s.date||""), s.name].map(csvCell).join(","));
+    out.push(["時刻","経過"].concat(headNames, ["合計"]).map(csvCell).join(","));
+    var tot = zero(), first = minStart(s.startedAt), last = minStart(stopAt), firstDay = new Date(first).toDateString();
+    if(last - first > 24*60*MIN_MS) last = first + 24*60*MIN_MS;   // 念のため最大24時間分
+    for(var k = first; k <= last; k += MIN_MS){
+      var row = map[k] || zero(), a = new Date(k);
+      row.forEach(function(v,i){ tot[i] += v; });
+      out.push([(a.toDateString() !== firstDay ? (a.getMonth()+1)+"/"+a.getDate()+" " : "") + hhmm(a), elapsedLabel(k - first)]
+        .concat(row, [row.reduce(function(x,y){ return x+y; }, 0)]).map(csvCell).join(","));
+    }
+    out.push(["合計",""].concat(tot, [tot.reduce(function(x,y){ return x+y; }, 0)]).map(csvCell).join(","));
+  });
+  return out;
 }
 function stamp(){ var d=new Date(),p=function(x){return String(x).padStart(2,"0");};
   return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+"-"+p(d.getHours())+p(d.getMinutes()); }
@@ -1106,7 +1169,7 @@ function currentCheckout(){
   var items = [], total = 0;
   (sess ? (sess.items||[]) : []).forEach(function(it){
     var d = it.qty - (base[it.id]||0);
-    if(d > 0){ items.push({ name:it.name, price:it.price, qty:d, kind:it.kind||"" }); total += it.price * d; }
+    if(d > 0){ items.push({ id:it.id, name:it.name, price:it.price, qty:d, kind:it.kind||"" }); total += it.price * d; }
   });
   return { items:items, total:total };
 }
@@ -1135,15 +1198,65 @@ $("checkoutBtn").addEventListener("click", async function(){
   if(!sess || sess.locked) return;
   var c = currentCheckout();
   if(!c.total){ toast("この会計に商品がありません"); return; }
-  if(!sess.checkoutBase) sess.checkoutBase = {};
-  (sess.items||[]).forEach(function(it){ sess.checkoutBase[it.id] = it.qty; });
-  if(!sess.checkouts) sess.checkouts = [];
-  sess.checkouts.push({ amount:c.total, count:c.items.reduce(function(a,i){return a+i.qty;},0), ts:Date.now() });
+  recordCheckout(c);
   await persist();
   renderItems(); renderTotal();   // 今の会計→0、売上に加算、カードは×0に戻る
   extPush(); // 差分0になり外部ディスプレイは¥0にリセット
   toast("会計完了：¥" + c.total.toLocaleString("ja-JP") + "（売上に加算）");
 });
+
+/* 1会計を記録：時刻・開始からの経過・商品別の販売数 */
+function recordCheckout(c){
+  var now = Date.now();
+  if(!sess.checkoutBase) sess.checkoutBase = {};
+  (sess.items||[]).forEach(function(it){ sess.checkoutBase[it.id] = it.qty; });
+  if(!sess.checkouts) sess.checkouts = [];
+  var rec = { amount:c.total, count:c.items.reduce(function(a,i){return a+i.qty;},0), ts:now,
+              items: c.items.map(function(i){ return { id:i.id, qty:i.qty }; }) };
+  if(sess.startedAt && !sess.stoppedAt) rec.el = now - sess.startedAt;     // 開始からの経過（ミリ秒）
+  sess.checkouts.push(rec);
+}
+
+/* ---------- 時刻の記録（開始〜終了）。表示はバックグラウンドで1秒ごとに更新 ---------- */
+var recTimer = null;
+function fmtClock(ts){ var d=new Date(ts); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
+function fmtElapsed(ms){
+  var s = Math.max(0, Math.floor(ms/1000)), h = Math.floor(s/3600), m = Math.floor(s%3600/60), x = s%60;
+  return h + ":" + String(m).padStart(2,"0") + ":" + String(x).padStart(2,"0");
+}
+function renderRec(){
+  var box = $("recBox"); if(!box) return;
+  if(!sess){ clearInterval(recTimer); recTimer = null; return; }
+  var on = !!(sess.startedAt && !sess.stoppedAt);
+  box.classList.toggle("on", on);
+  if(on){
+    var nRec = (sess.checkouts||[]).filter(function(c){ return c.el != null; }).length;
+    $("recTitle").textContent = "記録中";
+    $("recSub").innerHTML = '開始 <span class="num">'+fmtClock(sess.startedAt)+'</span>　経過 <span class="num">'+
+      fmtElapsed(Date.now()-sess.startedAt)+'</span>　記録 <span class="num">'+nRec+'</span>会計<br>「終了する」で記録を停止します';
+    if(!recTimer) recTimer = setInterval(renderRec, 1000);
+  }else{
+    clearInterval(recTimer); recTimer = null;
+    $("recTitle").textContent = "時刻の記録：未開始";
+    $("recSub").textContent = "「開始」を押すと、会計ごと・1分ごとの販売数をCSV用に記録します";
+  }
+}
+$("recStartBtn").addEventListener("click", function(){
+  if(!sess || sess.locked || sess.startedAt) return;
+  var open = currentCheckout();
+  confirmDialog({
+    title: "時刻の記録を開始しますか？",
+    body: "ここから「終了する」を押すまで、会計完了のたびに時刻・経過時間・商品別の販売数を記録します（CSV出力に反映）。" +
+          (open.total > 0 ? "計算中の会計も、会計完了した時点で記録されます。" : ""),
+    ok: "開始する",
+    onOk: async function(){
+      sess.startedAt = Date.now(); delete sess.stoppedAt;
+      await persist(); renderRec();
+      toast("記録を開始しました（" + fmtClock(sess.startedAt) + "）");
+    }
+  });
+});
+document.addEventListener("visibilitychange", function(){ if(!document.hidden) renderRec(); });
 
 function refreshExtUI(){
   var tg=$("extToggle"), panel=$("extPanel"), sub=$("extStateSub"), st=$("extStatus");

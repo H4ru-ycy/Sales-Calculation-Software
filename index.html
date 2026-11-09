@@ -276,6 +276,19 @@ body.in-editor .toast{bottom:calc(var(--footer-h) + var(--tab-h,54px) + 16px)}
 .invrow .ir-sub{font-size:12px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
 .invrow .ir-price{font-weight:700;color:var(--ink)}
 /* 取り込みボタン・ピッカー */
+.rec-box{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;background:var(--field);
+  border:1.5px solid var(--line);margin-bottom:14px}
+.rec-box.on{background:var(--banner-bg);border-color:transparent}
+.rec-info{flex:1;min-width:0}
+.rec-title{font-size:13.5px;font-weight:900;display:flex;align-items:center;gap:7px}
+.rec-box.on .rec-title{color:var(--teal)}
+.rec-box.on .rec-title::before{content:"";width:9px;height:9px;border-radius:50%;background:#E5484D;flex:none;animation:recblink 1.4s ease-in-out infinite}
+@keyframes recblink{50%{opacity:.25}}
+.rec-sub{font-size:11.5px;color:var(--muted);line-height:1.55;margin-top:3px}
+.rec-sub .num{font-family:"Roboto Mono",monospace;font-weight:700;color:var(--ink)}
+.rec-btn{flex:none;padding:12px 18px;border-radius:999px;border:none;background:var(--teal);color:#fff;font:inherit;font-size:15px;font-weight:900}
+.rec-btn:active{transform:translateY(1px)}
+.rec-box.on .rec-btn{display:none}
 .import-note{font-size:11.5px;color:var(--muted);line-height:1.6;margin:-6px 0 14px}
 .pick-search{width:100%;padding:11px;border:1.5px solid var(--line);border-radius:10px;
   background:var(--field);color:var(--ink);font-weight:500;margin-bottom:10px}
@@ -463,7 +476,7 @@ body.in-editor .toast{bottom:calc(var(--footer-h) + var(--tab-h,54px) + 16px)}
     <button class="hamb" data-menu aria-label="メニューを開く"><span></span><span></span><span></span></button>
   </div>
   <div class="hero">
-    <div class="eyebrow">Ver.2.4</div>
+    <div class="eyebrow">Ver.2.6</div>
     <h2>売上計算ツール</h2>
     <p>ファイルを作って商品を登録。＋と－で数えるだけ。</p>
   </div>
@@ -500,6 +513,13 @@ body.in-editor .toast{bottom:calc(var(--footer-h) + var(--tab-h,54px) + 16px)}
 
   <div id="addPanel" class="panel" style="margin-top:16px">
     <h3>商品を追加</h3>
+    <div class="rec-box" id="recBox">
+      <div class="rec-info">
+        <div class="rec-title" id="recTitle">時刻の記録：未開始</div>
+        <div class="rec-sub" id="recSub">「開始」を押すと、会計ごと・1分ごとの販売数をCSV用に記録します</div>
+      </div>
+      <button type="button" class="rec-btn" id="recStartBtn">▶ 開始</button>
+    </div>
     <button class="btn btn-primary" id="importInvBtn" style="margin-bottom:14px">📦 在庫管理から選んで追加</button>
     <div class="import-note">在庫管理タブで登録した頒布物を取り込めます。下のフォームから手入力もできます。</div>
     <div class="field">
@@ -605,7 +625,7 @@ body.in-editor .toast{bottom:calc(var(--footer-h) + var(--tab-h,54px) + 16px)}
 
   <div class="panel">
     <h3>CSV出力</h3>
-    <p class="u-desc">記録した売上をCSVファイルで書き出します。Excelやスプレッドシートで開けます。</p>
+    <p class="u-desc">記録した売上をCSVファイルで書き出します。Excelやスプレッドシートで開けます。<br>「開始」以降の、会計ごとの記録と商品別・1分ごとの販売数の表も一緒に出力されます。</p>
     <button class="btn btn-primary" id="csvAllBtn">すべての記録をCSV出力</button>
     <div style="height:8px"></div>
     <button class="btn btn-ghost" id="csvCopyBtn">CSVをコピー（貼り付け用）</button>
@@ -820,6 +840,6 @@ window.SALESYNC_API = "https://sale-sync.pages.dev/api";
                        disconnect:drop, isActive:active, _config:CONFIG };
 })(window);
 </script>
-<script src="main.js?v=2.4.1"></script>
+<script src="main.js?v=2.6"></script>
 </body>
 </html>
